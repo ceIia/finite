@@ -15,9 +15,10 @@ Built on [Ghostty](https://ghostty.org)'s terminal engine via [libghostty](https
 - macOS 26 or later
 - Xcode 26 or later
 - [Zig](https://ziglang.org/) (`brew install zig`)
-- A local clone of [Ghostty](https://github.com/ghostty-org/ghostty) (as a sibling directory, or set `GHOSTTY_SOURCE_DIR`)
 
 ### Setup
+
+Ghostty is included as a git submodule and cloned automatically with `--recurse-submodules`.
 
 ```bash
 git clone --recurse-submodules https://github.com/ceIia/finite.git
@@ -27,13 +28,7 @@ make build    # debug build
 make release  # release build, installs to /Applications
 ```
 
-`make setup` handles everything: building the GhosttyKit framework from the Ghostty source, caching it by commit SHA, symlinking it into the Xcode project, and copying terminfo and shell-integration resources.
-
-If your Ghostty checkout is somewhere other than `../ghostty`, set `GHOSTTY_SOURCE_DIR`:
-
-```bash
-GHOSTTY_SOURCE_DIR=~/src/ghostty make setup
-```
+`make setup` builds the GhosttyKit framework from the bundled Ghostty source, caches it by commit SHA, symlinks it into the Xcode project, and copies terminfo and shell-integration resources.
 
 ## Usage
 
