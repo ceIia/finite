@@ -20,7 +20,7 @@ Built on [Ghostty](https://ghostty.org)'s terminal engine via [libghostty](https
 ### Setup
 
 ```bash
-git clone --recurse-submodules https://github.com/user/finite.git
+git clone --recurse-submodules https://github.com/ceIia/finite.git
 cd finite/Finite
 make setup    # builds GhosttyKit, copies headers and resources
 make build    # debug build
