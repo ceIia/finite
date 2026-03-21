@@ -1,12 +1,12 @@
-<p align="center">
-  <img src="https://i.imgur.com/laXCGji.jpeg" alt="Finite" width="100%">
-</p>
-
 # Finite
 
 A spatial terminal multiplexer for macOS. Terminals live on an infinite canvas that you can pan, zoom, and arrange freely.
 
 Built on [Ghostty](https://ghostty.org)'s terminal engine via [libghostty](https://github.com/ghostty-org/ghostty).
+
+<p align="center">
+  <img src="https://i.imgur.com/laXCGji.jpeg" alt="Finite" width="100%">
+</p>
 
 ## Building
 
