@@ -12,8 +12,8 @@ Built on [Ghostty](https://ghostty.org)'s terminal engine via [libghostty](https
 
 ### Requirements
 
-- macOS 26 or later
-- Xcode 26 or later
+- macOS 15 (Sequoia) or later
+- Xcode 16 or later
 - [Zig](https://ziglang.org/) (`brew install zig`)
 
 ### Setup

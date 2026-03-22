@@ -49,8 +49,41 @@ private struct GlassIconButton: View {
                 .font(.system(size: iconSize, weight: .medium))
                 .foregroundStyle(.white.opacity(0.85))
                 .frame(width: iconSize * 2, height: iconSize * 2)
-                .glassEffect(.regular, in: .circle)
+                .glassOrMaterial(shape: .circle)
         }
         .buttonStyle(.plain)
     }
+}
+
+// MARK: - Glass Effect Compatibility
+
+/// Uses `.glassEffect()` (Liquid Glass) on macOS 26+, falls back to
+/// `.ultraThinMaterial` on earlier releases.
+extension View {
+    @ViewBuilder
+    func glassOrMaterial(shape: GlassFallbackShape) -> some View {
+        if #available(macOS 26.0, *) {
+            switch shape {
+            case .circle:
+                self.glassEffect(.regular, in: .circle)
+            case .capsule:
+                self.glassEffect(.regular, in: .capsule)
+            case .roundedRectangle(let r):
+                self.glassEffect(.regular, in: RoundedRectangle(cornerRadius: r))
+            }
+        } else {
+            switch shape {
+            case .circle:
+                self.background(.ultraThinMaterial).clipShape(Circle())
+            case .capsule:
+                self.background(.ultraThinMaterial).clipShape(Capsule())
+            case .roundedRectangle(let r):
+                self.background(.ultraThinMaterial).clipShape(RoundedRectangle(cornerRadius: r))
+            }
+        }
+    }
+}
+
+enum GlassFallbackShape {
+    case circle, capsule, roundedRectangle(cornerRadius: CGFloat)
 }

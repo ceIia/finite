@@ -101,6 +101,6 @@ private struct UpdateBanner: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 8)
-        .glassEffect(.regular, in: .capsule)
+        .glassOrMaterial(shape: .capsule)
     }
 }
