@@ -39,6 +39,6 @@ struct GlassContainer<Content: View>: View {
         content
             .frame(maxWidth: .infinity)
             .fixedSize(horizontal: false, vertical: true)
-            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
+            .glassOrMaterial(shape: .roundedRectangle(cornerRadius: 12))
     }
 }
