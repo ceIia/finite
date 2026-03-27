@@ -29,7 +29,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/finite/ghosttykit
-          key: ghosttykit-${{ hashFiles('ghostty/.git/HEAD', 'ghostty/.git/refs/heads/**') }}
+          key: ghosttykit-${{ github.sha }}
 
       - name: Build GhosttyKit
         run: cd Finite && make setup
