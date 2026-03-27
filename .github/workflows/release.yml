@@ -21,9 +21,9 @@ jobs:
           fetch-depth: 0
 
       - name: Install Zig
-        run: |
-          curl -L "https://ziglang.org/download/${ZIG_VERSION}/zig-macos-aarch64-${ZIG_VERSION}.tar.xz" | tar xJ
-          echo "$(pwd)/zig-macos-aarch64-${ZIG_VERSION}" >> $GITHUB_PATH
+        uses: mlugg/setup-zig@v2
+        with:
+          version: ${{ env.ZIG_VERSION }}
 
       - name: Cache GhosttyKit
         uses: actions/cache@v4
