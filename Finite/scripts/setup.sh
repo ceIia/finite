@@ -41,7 +41,16 @@ else
         (
             cd "$GHOSTTY_DIR"
             zig build -Demit-xcframework=true -Dxcframework-target="$XCFW_TARGET" -Doptimize=ReleaseFast
-        )
+        ) || {
+            # The zig build may fail on the app bundle step (DockTilePlugin)
+            # but the xcframework is built before that. Check if it exists.
+            if [ -d "$LOCAL_XCFRAMEWORK" ]; then
+                echo "==> zig build failed but GhosttyKit.xcframework was created, continuing..."
+            else
+                echo "Error: zig build failed and GhosttyKit.xcframework was not created"
+                exit 1
+            fi
+        }
     fi
 
     if [ ! -d "$LOCAL_XCFRAMEWORK" ]; then
