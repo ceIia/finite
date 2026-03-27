@@ -8,7 +8,13 @@ Built on [Ghostty](https://ghostty.org)'s terminal engine via [libghostty](https
   <img src="https://i.imgur.com/laXCGji.jpeg" alt="Finite" width="100%">
 </p>
 
-## Building
+## Install
+
+Download the latest DMG from [Releases](https://github.com/ceIia/finite/releases), open it, and drag Finite to Applications.
+
+Requires macOS 15 (Sequoia) or later. Finite is signed, notarized, and updates automatically via Sparkle.
+
+## Building from source
 
 ### Requirements
 

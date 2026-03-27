@@ -2,7 +2,7 @@ import Foundation
 import CoreGraphics
 import os
 
-private let logger = Logger(subsystem: "dev.finite", category: "CanvasState")
+private let logger = Logger(subsystem: "com.helm.finite", category: "CanvasState")
 
 /// Persisted canvas state — node layout and canvas transform.
 struct CanvasState: Codable {

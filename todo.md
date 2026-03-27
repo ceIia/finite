@@ -2,3 +2,7 @@
 - [ ] center on focused/selected terminal(s) w/o changing zoom levels
 - [ ] tweak panning constraints esp. with cursor over terminals
 - [ ] add file drag and drop support (claude code)
+- [ ] fix: when duplicating or creating terminal, focus isn't immediately moved
+- [ ] when closing terminals, focus moves to an n-1 tty, view should pan to make sure it's fully in view
+- [ ] cmd-click support for links in ttys
+- [ ] some macos level shortcuts are being swallowed and ignored (cmd-h, ...)

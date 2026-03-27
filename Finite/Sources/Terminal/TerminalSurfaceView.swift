@@ -1,7 +1,7 @@
 import AppKit
 import os
 
-private let logger = Logger(subsystem: "dev.finite", category: "TerminalSurfaceView")
+private let logger = Logger(subsystem: "com.helm.finite", category: "TerminalSurfaceView")
 
 /// NSView that hosts a single libghostty terminal surface.
 /// Handles Metal rendering (via libghostty's internal CALayer), keyboard input,

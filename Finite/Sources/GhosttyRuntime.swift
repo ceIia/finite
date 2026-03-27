@@ -1,7 +1,7 @@
 import AppKit
 import os
 
-private let logger = Logger(subsystem: "dev.finite", category: "GhosttyRuntime")
+private let logger = Logger(subsystem: "com.helm.finite", category: "GhosttyRuntime")
 
 /// Singleton managing the ghostty_app_t lifecycle and runtime callbacks.
 final class GhosttyRuntime {

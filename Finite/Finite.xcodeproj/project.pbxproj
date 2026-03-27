@@ -435,7 +435,7 @@
 					"-framework",
 					Carbon,
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = dev.finitedev.finite;
+				PRODUCT_BUNDLE_IDENTIFIER = com.helm.finite;
 				PRODUCT_NAME = Finite;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "Finite-Bridging-Header.h";
@@ -477,7 +477,7 @@
 					"-framework",
 					Carbon,
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = dev.finitedev.finite;
+				PRODUCT_BUNDLE_IDENTIFIER = com.helm.finite;
 				PRODUCT_NAME = Finite;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;

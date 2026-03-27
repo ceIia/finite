@@ -23,7 +23,7 @@
 	<key>NSMainNibFile</key>
 	<string></string>
 	<key>NSHumanReadableCopyright</key>
-	<string></string>
+	<string>Helm</string>
 	<key>NSDownloadsFolderUsageDescription</key>
 	<string>Finite may need access to your Downloads folder when a terminal session uses it as a working directory.</string>
 	<key>GhosttyCommit</key>
