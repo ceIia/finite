@@ -62,6 +62,7 @@ private struct GlassIconButton: View {
 extension View {
     @ViewBuilder
     func glassOrMaterial(shape: GlassFallbackShape) -> some View {
+        #if canImport(GlassEffect)
         if #available(macOS 26.0, *) {
             switch shape {
             case .circle:
@@ -72,14 +73,22 @@ extension View {
                 self.glassEffect(.regular, in: RoundedRectangle(cornerRadius: r))
             }
         } else {
-            switch shape {
-            case .circle:
-                self.background(.ultraThinMaterial).clipShape(Circle())
-            case .capsule:
-                self.background(.ultraThinMaterial).clipShape(Capsule())
-            case .roundedRectangle(let r):
-                self.background(.ultraThinMaterial).clipShape(RoundedRectangle(cornerRadius: r))
-            }
+            _materialFallback(shape: shape)
+        }
+        #else
+        _materialFallback(shape: shape)
+        #endif
+    }
+
+    @ViewBuilder
+    private func _materialFallback(shape: GlassFallbackShape) -> some View {
+        switch shape {
+        case .circle:
+            self.background(.ultraThinMaterial).clipShape(Circle())
+        case .capsule:
+            self.background(.ultraThinMaterial).clipShape(Capsule())
+        case .roundedRectangle(let r):
+            self.background(.ultraThinMaterial).clipShape(RoundedRectangle(cornerRadius: r))
         }
     }
 }
