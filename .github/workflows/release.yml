@@ -103,24 +103,24 @@ jobs:
           CERT_NAME="$MACOS_CERTIFICATE_NAME"
           ENTITLEMENTS="$(pwd)/Finite/Resources/Finite.entitlements"
 
-          # Sign Sparkle internals (inner to outer)
-          codesign -f -s "$CERT_NAME" -o runtime \
+          # Sign Sparkle internals (inner to outer) with timestamp
+          codesign -f -s "$CERT_NAME" -o runtime --timestamp \
             "$APP/Contents/Frameworks/Sparkle.framework/Versions/B/XPCServices/Downloader.xpc"
-          codesign -f -s "$CERT_NAME" -o runtime \
+          codesign -f -s "$CERT_NAME" -o runtime --timestamp \
             "$APP/Contents/Frameworks/Sparkle.framework/Versions/B/XPCServices/Installer.xpc"
-          codesign -f -s "$CERT_NAME" -o runtime \
+          codesign -f -s "$CERT_NAME" -o runtime --timestamp \
             "$APP/Contents/Frameworks/Sparkle.framework/Versions/B/Autoupdate"
-          codesign -f -s "$CERT_NAME" -o runtime \
+          codesign -f -s "$CERT_NAME" -o runtime --timestamp \
             "$APP/Contents/Frameworks/Sparkle.framework/Versions/B/Updater.app"
-          codesign -f -s "$CERT_NAME" -o runtime \
+          codesign -f -s "$CERT_NAME" -o runtime --timestamp \
             "$APP/Contents/Frameworks/Sparkle.framework"
 
           # Sign the app bundle
-          codesign -f -s "$CERT_NAME" -o runtime \
+          codesign -f -s "$CERT_NAME" -o runtime --timestamp \
             --entitlements "$ENTITLEMENTS" "$APP"
 
           # Verify
-          codesign --verify --strict "$APP"
+          codesign --verify --deep --strict "$APP"
 
       - name: Create DMG
         run: |

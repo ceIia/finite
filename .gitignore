@@ -18,5 +18,9 @@ Finite/ghostty.h
 Finite/Resources/terminfo/
 Finite/Resources/ghostty/
 
+# Secrets
+.env*
+*.p8
+
 # Claude
 .claude/
