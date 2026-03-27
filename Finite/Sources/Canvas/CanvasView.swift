@@ -265,6 +265,7 @@ class CanvasView: NSView {
         NSAnimationContext.runAnimationGroup { context in
             context.duration = 0.3
             context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+            context.allowsImplicitAnimation = true
             self.canvasTransform = target
         }
     }
@@ -277,6 +278,7 @@ class CanvasView: NSView {
         NSAnimationContext.runAnimationGroup { context in
             context.duration = 0.3
             context.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+            context.allowsImplicitAnimation = true
             self.canvasTransform = target
         }
     }

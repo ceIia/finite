@@ -16,6 +16,7 @@ final class SidebarModel: ObservableObject {
     var onCloseSelected: (() -> Void)?
     var onCloseSingle: ((TerminalNodeView) -> Void)?
     var onDuplicateNode: ((TerminalNodeView) -> Void)?
+    var onPanToNode: ((TerminalNodeView) -> Void)?
     var onHoverPulse: ((TerminalNodeView) -> Void)?
 
     func update(from manager: TerminalNodeManager) {
@@ -54,7 +55,12 @@ struct SidebarView: View {
                 LazyVStack(spacing: 1) {
                     ForEach(model.nodes) { item in
                         SidebarNodeRow(item: item, model: model)
-                            .onTapGesture {
+                            .onTapGesture(count: 2) {
+                                if let node = item.node {
+                                    model.onPanToNode?(node)
+                                }
+                            }
+                            .onTapGesture(count: 1) {
                                 if let node = item.node {
                                     let mods = NSApp.currentEvent?.modifierFlags
                                         .intersection(.deviceIndependentFlagsMask) ?? []

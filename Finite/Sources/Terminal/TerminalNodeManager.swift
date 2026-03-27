@@ -18,6 +18,7 @@ class TerminalNodeManager {
     private(set) var selectedNodes: Set<ObjectIdentifier> = []
     private var surfaceMap: [UnsafeMutableRawPointer: TerminalNodeView] = [:]
     private var activeNodes: Set<ObjectIdentifier> = []
+    private var confirmedCloses: Set<ObjectIdentifier> = []
     private var nodePWD: [ObjectIdentifier: String] = [:]
     private weak var canvasView: CanvasView?
     private weak var window: NSWindow?
@@ -114,6 +115,7 @@ class TerminalNodeManager {
         nodes.removeAll { $0 === node }
         selectedNodes.remove(id)
         activeNodes.remove(id)
+        confirmedCloses.remove(id)
         nodePWD.removeValue(forKey: id)
 
         // Update focus to next available node
@@ -260,6 +262,12 @@ class TerminalNodeManager {
 
     func requestCloseNode(_ node: TerminalNodeView) {
         guard let surface = node.terminalView.surface else { return }
+        let nodeID = ObjectIdentifier(node)
+        if confirmedCloses.contains(nodeID) {
+            confirmedCloses.remove(nodeID)
+            GhosttyRuntime.shared.onSurfaceClosed?(surface)
+            return
+        }
         if ghostty_surface_needs_confirm_quit(surface) {
             let alert = NSAlert()
             alert.messageText = "Close Terminal?"
@@ -268,8 +276,9 @@ class TerminalNodeManager {
             alert.addButton(withTitle: "Close")
             alert.addButton(withTitle: "Cancel")
             if let window = window {
-                alert.beginSheetModal(for: window) { response in
+                alert.beginSheetModal(for: window) { [weak self] response in
                     if response == .alertFirstButtonReturn {
+                        self?.confirmedCloses.insert(nodeID)
                         ghostty_surface_request_close(surface)
                     }
                 }
@@ -282,6 +291,7 @@ class TerminalNodeManager {
     func closeSelectedNodes() {
         for node in selectedNodeViews {
             if let surface = node.terminalView.surface {
+                confirmedCloses.insert(ObjectIdentifier(node))
                 ghostty_surface_request_close(surface)
             }
         }
