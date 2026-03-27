@@ -32,6 +32,8 @@ jobs:
           key: ghosttykit-${{ github.sha }}
 
       - name: Build GhosttyKit
+        env:
+          GHOSTTYKIT_TARGET: aarch64-macos
         run: cd Finite && make setup
 
       - name: Resolve packages

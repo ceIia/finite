@@ -36,10 +36,11 @@ else
     if [ -d "$LOCAL_XCFRAMEWORK" ]; then
         echo "==> Seeding cache from existing local GhosttyKit.xcframework"
     else
-        echo "==> Building GhosttyKit.xcframework (this may take a few minutes)..."
+        XCFW_TARGET="${GHOSTTYKIT_TARGET:-universal}"
+        echo "==> Building GhosttyKit.xcframework (target=$XCFW_TARGET, this may take a few minutes)..."
         (
             cd "$GHOSTTY_DIR"
-            zig build -Demit-xcframework=true -Dxcframework-target=universal -Doptimize=ReleaseFast
+            zig build -Demit-xcframework=true -Dxcframework-target="$XCFW_TARGET" -Doptimize=ReleaseFast
         )
     fi
 
