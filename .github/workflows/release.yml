@@ -122,25 +122,12 @@ jobs:
           # Verify
           codesign --verify --deep --strict "$APP"
 
-      - name: Install create-dmg
-        run: brew install create-dmg
-
       - name: Create DMG
         run: |
           APP="${{ steps.locate.outputs.app_path }}"
           VERSION=${GITHUB_REF#refs/tags/v}
 
-          create-dmg \
-            --volname "Finite" \
-            --window-pos 200 120 \
-            --window-size 660 400 \
-            --icon-size 80 \
-            --icon "Finite.app" 180 190 \
-            --app-drop-link 480 190 \
-            --hide-extension "Finite.app" \
-            --no-internet-enable \
-            "$RUNNER_TEMP/Finite-$VERSION.dmg" \
-            "$APP"
+          ./scripts/create-dmg.sh "$APP" "$RUNNER_TEMP"
 
           echo "dmg_path=$RUNNER_TEMP/Finite-$VERSION.dmg" >> $GITHUB_ENV
 
