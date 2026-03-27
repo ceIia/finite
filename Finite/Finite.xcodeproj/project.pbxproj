@@ -1,0 +1,491 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A100000001 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000001 /* main.swift */; };
+		A100000002 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000002 /* AppDelegate.swift */; };
+		A100000003 /* GhosttyRuntime.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000003 /* GhosttyRuntime.swift */; };
+		A100000004 /* TerminalSurfaceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000004 /* TerminalSurfaceView.swift */; };
+		A100000005 /* CanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000005 /* CanvasView.swift */; };
+		A100000006 /* CanvasTransform.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000006 /* CanvasTransform.swift */; };
+		A100000007 /* TerminalNodeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000007 /* TerminalNodeView.swift */; };
+		A100000008 /* TerminalNodeManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000008 /* TerminalNodeManager.swift */; };
+		A100000009 /* SidebarPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000009 /* SidebarPanel.swift */; };
+		A10000000A /* SidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000000A /* SidebarView.swift */; };
+		A10000000B /* GhosttyKit.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = B10000000B /* GhosttyKit.xcframework */; };
+		A10000000D /* Metal.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B10000000D /* Metal.framework */; };
+		A10000000E /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B10000000E /* QuartzCore.framework */; };
+		A10000000F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B10000000F /* Assets.xcassets */; };
+		A100000010 /* NodeTitleBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000014 /* NodeTitleBarView.swift */; };
+		A100000011 /* MinimapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000015 /* MinimapView.swift */; };
+		A100000012 /* CanvasState.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000016 /* CanvasState.swift */; };
+		A100000013 /* SnapGuideEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000017 /* SnapGuideEngine.swift */; };
+		A100000014 /* ToolbarButtonsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000018 /* ToolbarButtonsView.swift */; };
+		A100000015 /* UpdateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000019 /* UpdateManager.swift */; };
+		A100000016 /* UpdateBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000001A /* UpdateBannerView.swift */; };
+		A100000017 /* terminfo in Resources */ = {isa = PBXBuildFile; fileRef = B10000001B /* terminfo */; };
+		A100000018 /* ghostty in Resources */ = {isa = PBXBuildFile; fileRef = B10000001C /* ghostty */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		B100000001 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		B100000002 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		B100000003 /* GhosttyRuntime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GhosttyRuntime.swift; sourceTree = "<group>"; };
+		B100000004 /* TerminalSurfaceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalSurfaceView.swift; sourceTree = "<group>"; };
+		B100000005 /* CanvasView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasView.swift; sourceTree = "<group>"; };
+		B100000006 /* CanvasTransform.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasTransform.swift; sourceTree = "<group>"; };
+		B100000007 /* TerminalNodeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalNodeView.swift; sourceTree = "<group>"; };
+		B100000008 /* TerminalNodeManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalNodeManager.swift; sourceTree = "<group>"; };
+		B100000009 /* SidebarPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarPanel.swift; sourceTree = "<group>"; };
+		B10000000A /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
+		B10000000B /* GhosttyKit.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; path = GhosttyKit.xcframework; sourceTree = "<group>"; };
+		B10000000D /* Metal.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Metal.framework; path = System/Library/Frameworks/Metal.framework; sourceTree = SDKROOT; };
+		B10000000E /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		B10000000F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		B100000010 /* Finite.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Finite.entitlements; sourceTree = "<group>"; };
+		B100000011 /* Finite-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Finite-Bridging-Header.h"; sourceTree = "<group>"; };
+		B100000012 /* ghostty.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ghostty.h; sourceTree = "<group>"; };
+		B100000013 /* Finite.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Finite.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		B100000014 /* NodeTitleBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NodeTitleBarView.swift; sourceTree = "<group>"; };
+		B100000015 /* MinimapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MinimapView.swift; sourceTree = "<group>"; };
+		B100000016 /* CanvasState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasState.swift; sourceTree = "<group>"; };
+		B100000017 /* SnapGuideEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapGuideEngine.swift; sourceTree = "<group>"; };
+		B100000018 /* ToolbarButtonsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolbarButtonsView.swift; sourceTree = "<group>"; };
+		B100000019 /* UpdateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateManager.swift; sourceTree = "<group>"; };
+		B10000001A /* UpdateBannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateBannerView.swift; sourceTree = "<group>"; };
+		B10000001B /* terminfo */ = {isa = PBXFileReference; lastKnownFileType = folder; path = terminfo; sourceTree = "<group>"; };
+		B10000001C /* ghostty */ = {isa = PBXFileReference; lastKnownFileType = folder; path = ghostty; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		D100000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000000B /* GhosttyKit.xcframework in Frameworks */,
+				A10000000D /* Metal.framework in Frameworks */,
+				A10000000E /* QuartzCore.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		E100000001 = {
+			isa = PBXGroup;
+			children = (
+				B100000011 /* Finite-Bridging-Header.h */,
+				B100000012 /* ghostty.h */,
+				B10000000B /* GhosttyKit.xcframework */,
+				E100000002 /* Sources */,
+				E100000006 /* Resources */,
+				E100000007 /* Frameworks */,
+				E100000008 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		E100000002 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				B100000001 /* main.swift */,
+				B100000002 /* AppDelegate.swift */,
+				B100000003 /* GhosttyRuntime.swift */,
+				B100000019 /* UpdateManager.swift */,
+				E100000003 /* Canvas */,
+				E100000004 /* Terminal */,
+				E100000005 /* Sidebar */,
+				E100000009 /* UI */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		E100000003 /* Canvas */ = {
+			isa = PBXGroup;
+			children = (
+				B100000005 /* CanvasView.swift */,
+				B100000006 /* CanvasTransform.swift */,
+				B100000015 /* MinimapView.swift */,
+				B100000016 /* CanvasState.swift */,
+				B100000017 /* SnapGuideEngine.swift */,
+			);
+			path = Canvas;
+			sourceTree = "<group>";
+		};
+		E100000004 /* Terminal */ = {
+			isa = PBXGroup;
+			children = (
+				B100000004 /* TerminalSurfaceView.swift */,
+				B100000007 /* TerminalNodeView.swift */,
+				B100000014 /* NodeTitleBarView.swift */,
+				B100000008 /* TerminalNodeManager.swift */,
+			);
+			path = Terminal;
+			sourceTree = "<group>";
+		};
+		E100000005 /* Sidebar */ = {
+			isa = PBXGroup;
+			children = (
+				B100000009 /* SidebarPanel.swift */,
+				B10000000A /* SidebarView.swift */,
+			);
+			path = Sidebar;
+			sourceTree = "<group>";
+		};
+		E100000006 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000F /* Assets.xcassets */,
+				B100000010 /* Finite.entitlements */,
+				B10000001B /* terminfo */,
+				B10000001C /* ghostty */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		E100000007 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				B10000000D /* Metal.framework */,
+				B10000000E /* QuartzCore.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		E100000008 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				B100000013 /* Finite.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		E100000009 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				B100000018 /* ToolbarButtonsView.swift */,
+				B10000001A /* UpdateBannerView.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		F100000001 /* Finite */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F100000004 /* Build configuration list for PBXNativeTarget "Finite" */;
+			buildPhases = (
+				F100000002 /* Sources */,
+				D100000001 /* Frameworks */,
+				F100000003 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Finite;
+			productName = Finite;
+			productReference = B100000013 /* Finite.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		F100000005 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1540;
+				LastUpgradeCheck = 1540;
+			};
+			buildConfigurationList = F100000006 /* Build configuration list for PBXProject "Finite" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = E100000001;
+			productRefGroup = E100000008 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				F100000001 /* Finite */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		F100000003 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000000F /* Assets.xcassets in Resources */,
+				A100000017 /* terminfo in Resources */,
+				A100000018 /* ghostty in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		F100000002 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A100000001 /* main.swift in Sources */,
+				A100000002 /* AppDelegate.swift in Sources */,
+				A100000003 /* GhosttyRuntime.swift in Sources */,
+				A100000004 /* TerminalSurfaceView.swift in Sources */,
+				A100000005 /* CanvasView.swift in Sources */,
+				A100000006 /* CanvasTransform.swift in Sources */,
+				A100000007 /* TerminalNodeView.swift in Sources */,
+				A100000008 /* TerminalNodeManager.swift in Sources */,
+				A100000009 /* SidebarPanel.swift in Sources */,
+				A10000000A /* SidebarView.swift in Sources */,
+				A100000010 /* NodeTitleBarView.swift in Sources */,
+				A100000011 /* MinimapView.swift in Sources */,
+				A100000012 /* CanvasState.swift in Sources */,
+				A100000013 /* SnapGuideEngine.swift in Sources */,
+				A100000014 /* ToolbarButtonsView.swift in Sources */,
+				A100000015 /* UpdateManager.swift in Sources */,
+				A100000016 /* UpdateBannerView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		G100000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		G100000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		G100000003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = Resources/Finite.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)";
+				GENERATE_INFOPLIST_FILE = YES;
+				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSDownloadsFolderUsageDescription = "Finite may need access to your Downloads folder when a terminal session uses it as a working directory.";
+				INFOPLIST_KEY_NSMainNibFile = "";
+				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				OTHER_LDFLAGS = (
+					"-lc++",
+					"-framework",
+					Metal,
+					"-framework",
+					QuartzCore,
+					"-framework",
+					IOSurface,
+					"-framework",
+					UniformTypeIdentifiers,
+					"-framework",
+					Carbon,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = dev.finitedev.finite;
+				PRODUCT_NAME = Finite;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "Finite-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		G100000004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
+				CODE_SIGN_ENTITLEMENTS = Resources/Finite.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)";
+				GENERATE_INFOPLIST_FILE = YES;
+				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSDownloadsFolderUsageDescription = "Finite may need access to your Downloads folder when a terminal session uses it as a working directory.";
+				INFOPLIST_KEY_NSMainNibFile = "";
+				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				OTHER_LDFLAGS = (
+					"-lc++",
+					"-framework",
+					Metal,
+					"-framework",
+					QuartzCore,
+					"-framework",
+					IOSurface,
+					"-framework",
+					UniformTypeIdentifiers,
+					"-framework",
+					Carbon,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = dev.finitedev.finite;
+				PRODUCT_NAME = Finite;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "Finite-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		F100000004 /* Build configuration list for PBXNativeTarget "Finite" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				G100000003 /* Debug */,
+				G100000004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F100000006 /* Build configuration list for PBXProject "Finite" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				G100000001 /* Debug */,
+				G100000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = F100000005 /* Project object */;
+}

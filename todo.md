@@ -1,0 +1,4 @@
+- [ ] attention queues
+- [ ] center on focused/selected terminal(s) w/o changing zoom levels
+- [ ] tweak panning constraints esp. with cursor over terminals
+- [ ] add file drag and drop support (claude code)
