@@ -26,8 +26,7 @@
 		A100000012 /* CanvasState.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000016 /* CanvasState.swift */; };
 		A100000013 /* SnapGuideEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000017 /* SnapGuideEngine.swift */; };
 		A100000014 /* ToolbarButtonsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000018 /* ToolbarButtonsView.swift */; };
-		A100000015 /* UpdateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000019 /* UpdateManager.swift */; };
-		A100000016 /* UpdateBannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000001A /* UpdateBannerView.swift */; };
+		A100000019 /* SparkleUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000001D /* SparkleUpdater.swift */; };
 		A100000017 /* terminfo in Resources */ = {isa = PBXBuildFile; fileRef = B10000001B /* terminfo */; };
 		A100000018 /* ghostty in Resources */ = {isa = PBXBuildFile; fileRef = B10000001C /* ghostty */; };
 /* End PBXBuildFile section */
@@ -56,8 +55,8 @@
 		B100000016 /* CanvasState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasState.swift; sourceTree = "<group>"; };
 		B100000017 /* SnapGuideEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapGuideEngine.swift; sourceTree = "<group>"; };
 		B100000018 /* ToolbarButtonsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolbarButtonsView.swift; sourceTree = "<group>"; };
-		B100000019 /* UpdateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateManager.swift; sourceTree = "<group>"; };
-		B10000001A /* UpdateBannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateBannerView.swift; sourceTree = "<group>"; };
+		B10000001D /* SparkleUpdater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SparkleUpdater.swift; sourceTree = "<group>"; };
+		B10000001E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B10000001B /* terminfo */ = {isa = PBXFileReference; lastKnownFileType = folder; path = terminfo; sourceTree = "<group>"; };
 		B10000001C /* ghostty */ = {isa = PBXFileReference; lastKnownFileType = folder; path = ghostty; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -95,7 +94,7 @@
 				B100000001 /* main.swift */,
 				B100000002 /* AppDelegate.swift */,
 				B100000003 /* GhosttyRuntime.swift */,
-				B100000019 /* UpdateManager.swift */,
+				B10000001D /* SparkleUpdater.swift */,
 				E100000003 /* Canvas */,
 				E100000004 /* Terminal */,
 				E100000005 /* Sidebar */,
@@ -141,6 +140,7 @@
 			children = (
 				B10000000F /* Assets.xcassets */,
 				B100000010 /* Finite.entitlements */,
+				B10000001E /* Info.plist */,
 				B10000001B /* terminfo */,
 				B10000001C /* ghostty */,
 			);
@@ -168,7 +168,6 @@
 			isa = PBXGroup;
 			children = (
 				B100000018 /* ToolbarButtonsView.swift */,
-				B10000001A /* UpdateBannerView.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -183,12 +182,16 @@
 				F100000002 /* Sources */,
 				D100000001 /* Frameworks */,
 				F100000003 /* Resources */,
+				D100000002 /* Stamp GhosttyCommit */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			name = Finite;
+			packageProductDependencies = (
+				C100000002 /* Sparkle */,
+			);
 			productName = Finite;
 			productReference = B100000013 /* Finite.app */;
 			productType = "com.apple.product-type.application";
@@ -212,6 +215,9 @@
 				Base,
 			);
 			mainGroup = E100000001;
+			packageReferences = (
+				C100000001 /* XCRemoteSwiftPackageReference "Sparkle" */,
+			);
 			productRefGroup = E100000008 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -254,12 +260,32 @@
 				A100000012 /* CanvasState.swift in Sources */,
 				A100000013 /* SnapGuideEngine.swift in Sources */,
 				A100000014 /* ToolbarButtonsView.swift in Sources */,
-				A100000015 /* UpdateManager.swift in Sources */,
-				A100000016 /* UpdateBannerView.swift in Sources */,
+				A100000019 /* SparkleUpdater.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		D100000002 /* Stamp GhosttyCommit */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Stamp GhosttyCommit";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "GHOSTTY_DIR=\"${PROJECT_DIR}/../ghostty\"\nif [ -e \"$GHOSTTY_DIR/.git\" ]; then\n    COMMIT=$(git -C \"$GHOSTTY_DIR\" rev-parse --short HEAD 2>/dev/null || echo \"unknown\")\nelse\n    COMMIT=\"unknown\"\nfi\n/usr/libexec/PlistBuddy -c \"Set :GhosttyCommit $COMMIT\" \"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
 		G100000001 /* Debug */ = {
@@ -386,14 +412,11 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = CC8BFG7PLN;
+				ENABLE_HARDENED_RUNTIME = YES;
 				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)";
-				GENERATE_INFOPLIST_FILE = YES;
 				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)";
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				INFOPLIST_KEY_NSDownloadsFolderUsageDescription = "Finite may need access to your Downloads folder when a terminal session uses it as a working directory.";
-				INFOPLIST_KEY_NSMainNibFile = "";
-				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				INFOPLIST_FILE = Resources/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -427,17 +450,15 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = Resources/Finite.entitlements;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "Developer ID Application";
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = CC8BFG7PLN;
+				ENABLE_HARDENED_RUNTIME = YES;
 				FRAMEWORK_SEARCH_PATHS = "$(PROJECT_DIR)";
-				GENERATE_INFOPLIST_FILE = YES;
 				HEADER_SEARCH_PATHS = "$(PROJECT_DIR)";
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				INFOPLIST_KEY_NSDownloadsFolderUsageDescription = "Finite may need access to your Downloads folder when a terminal session uses it as a working directory.";
-				INFOPLIST_KEY_NSMainNibFile = "";
-				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				INFOPLIST_FILE = Resources/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -458,6 +479,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = dev.finitedev.finite;
 				PRODUCT_NAME = Finite;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "Finite-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
@@ -486,6 +508,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		C100000001 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		C100000002 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C100000001 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = F100000005 /* Project object */;
 }

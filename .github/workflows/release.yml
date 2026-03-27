@@ -1,0 +1,247 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+*'
+
+env:
+  ZIG_VERSION: "0.15.2"
+
+jobs:
+  build-and-release:
+    runs-on: macos-15
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Install Zig
+        run: |
+          curl -L "https://ziglang.org/download/${ZIG_VERSION}/zig-macos-aarch64-${ZIG_VERSION}.tar.xz" | tar xJ
+          echo "$(pwd)/zig-macos-aarch64-${ZIG_VERSION}" >> $GITHUB_PATH
+
+      - name: Cache GhosttyKit
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/finite/ghosttykit
+          key: ghosttykit-${{ hashFiles('ghostty/.git/HEAD', 'ghostty/.git/refs/heads/**') }}
+
+      - name: Build GhosttyKit
+        run: cd Finite && make setup
+
+      - name: Resolve packages
+        run: |
+          cd Finite
+          xcodebuild -project Finite.xcodeproj -scheme Finite \
+            -resolvePackageDependencies
+
+      - name: Import certificate
+        env:
+          MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+          MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
+          MACOS_CI_KEYCHAIN_PWD: ${{ secrets.MACOS_CI_KEYCHAIN_PWD }}
+        run: |
+          CERTIFICATE_PATH=$RUNNER_TEMP/build_certificate.p12
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+
+          echo -n "$MACOS_CERTIFICATE" | base64 --decode -o $CERTIFICATE_PATH
+
+          security create-keychain -p "$MACOS_CI_KEYCHAIN_PWD" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p "$MACOS_CI_KEYCHAIN_PWD" $KEYCHAIN_PATH
+
+          security import $CERTIFICATE_PATH -P "$MACOS_CERTIFICATE_PWD" \
+            -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security set-key-partition-list -S apple-tool:,apple: \
+            -k "$MACOS_CI_KEYCHAIN_PWD" $KEYCHAIN_PATH
+          security list-keychain -d user -s $KEYCHAIN_PATH
+
+      - name: Build
+        env:
+          MACOS_CERTIFICATE_NAME: ${{ secrets.MACOS_CERTIFICATE_NAME }}
+        run: |
+          cd Finite
+          xcodebuild -project Finite.xcodeproj -scheme Finite \
+            -configuration Release \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY="$MACOS_CERTIFICATE_NAME" \
+            DEVELOPMENT_TEAM=CC8BFG7PLN \
+            ENABLE_HARDENED_RUNTIME=YES \
+            build
+
+      - name: Locate app
+        id: locate
+        run: |
+          APP=$(find ~/Library/Developer/Xcode/DerivedData \
+            -path "*/Finite-*/Build/Products/Release/Finite.app" \
+            -maxdepth 5 2>/dev/null | head -1)
+          echo "app_path=$APP" >> $GITHUB_OUTPUT
+
+      - name: Stamp version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          BUILD_NUMBER=$(git rev-list --count HEAD)
+          APP="${{ steps.locate.outputs.app_path }}"
+
+          /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" \
+            "$APP/Contents/Info.plist"
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" \
+            "$APP/Contents/Info.plist"
+
+      - name: Re-sign after version stamp
+        env:
+          MACOS_CERTIFICATE_NAME: ${{ secrets.MACOS_CERTIFICATE_NAME }}
+        run: |
+          APP="${{ steps.locate.outputs.app_path }}"
+          CERT_NAME="$MACOS_CERTIFICATE_NAME"
+          ENTITLEMENTS="$(pwd)/Finite/Resources/Finite.entitlements"
+
+          # Sign Sparkle internals (inner to outer)
+          codesign -f -s "$CERT_NAME" -o runtime \
+            "$APP/Contents/Frameworks/Sparkle.framework/Versions/B/XPCServices/Downloader.xpc"
+          codesign -f -s "$CERT_NAME" -o runtime \
+            "$APP/Contents/Frameworks/Sparkle.framework/Versions/B/XPCServices/Installer.xpc"
+          codesign -f -s "$CERT_NAME" -o runtime \
+            "$APP/Contents/Frameworks/Sparkle.framework/Versions/B/Autoupdate"
+          codesign -f -s "$CERT_NAME" -o runtime \
+            "$APP/Contents/Frameworks/Sparkle.framework/Versions/B/Updater.app"
+          codesign -f -s "$CERT_NAME" -o runtime \
+            "$APP/Contents/Frameworks/Sparkle.framework"
+
+          # Sign the app bundle
+          codesign -f -s "$CERT_NAME" -o runtime \
+            --entitlements "$ENTITLEMENTS" "$APP"
+
+          # Verify
+          codesign --verify --strict "$APP"
+
+      - name: Create DMG
+        run: |
+          APP="${{ steps.locate.outputs.app_path }}"
+          VERSION=${GITHUB_REF#refs/tags/v}
+
+          # Create a temporary folder for DMG contents
+          DMG_DIR=$(mktemp -d)
+          cp -R "$APP" "$DMG_DIR/"
+          ln -s /Applications "$DMG_DIR/Applications"
+
+          hdiutil create -volname "Finite $VERSION" \
+            -srcfolder "$DMG_DIR" \
+            -ov -format UDZO \
+            "$RUNNER_TEMP/Finite-$VERSION.dmg"
+
+          echo "dmg_path=$RUNNER_TEMP/Finite-$VERSION.dmg" >> $GITHUB_ENV
+
+      - name: Notarize DMG
+        env:
+          APPLE_NOTARIZATION_KEY: ${{ secrets.APPLE_NOTARIZATION_KEY }}
+          APPLE_NOTARIZATION_KEY_ID: ${{ secrets.APPLE_NOTARIZATION_KEY_ID }}
+          APPLE_NOTARIZATION_ISSUER: ${{ secrets.APPLE_NOTARIZATION_ISSUER }}
+        run: |
+          # Write the API key to a file
+          mkdir -p ~/private_keys
+          KEY_PATH=~/private_keys/AuthKey_${APPLE_NOTARIZATION_KEY_ID}.p8
+          echo "$APPLE_NOTARIZATION_KEY" > "$KEY_PATH"
+
+          xcrun notarytool submit "$dmg_path" \
+            --key "$KEY_PATH" \
+            --key-id "$APPLE_NOTARIZATION_KEY_ID" \
+            --issuer "$APPLE_NOTARIZATION_ISSUER" \
+            --wait
+
+          xcrun stapler staple "$dmg_path"
+
+      - name: Sign update for Sparkle
+        env:
+          SPARKLE_SIGNING_KEY: ${{ secrets.SPARKLE_SIGNING_KEY }}
+        run: |
+          # Download Sparkle tools
+          SPARKLE_VERSION="2.9.0"
+          curl -L "https://github.com/sparkle-project/Sparkle/releases/download/${SPARKLE_VERSION}/Sparkle-for-Swift-Package-Manager.zip" \
+            -o sparkle-tools.zip
+          unzip -q sparkle-tools -d sparkle-tools
+
+          # Sign the DMG for Sparkle
+          SIGNATURE=$(echo "$SPARKLE_SIGNING_KEY" | ./sparkle-tools/bin/sign_update "$dmg_path")
+          echo "sparkle_signature=$SIGNATURE" >> $GITHUB_ENV
+
+      - name: Generate appcast item
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          DMG_SIZE=$(stat -f%z "$dmg_path")
+          DATE=$(date -R)
+
+          cat > "$RUNNER_TEMP/appcast.xml" << APPCAST_EOF
+          <?xml version="1.0" encoding="utf-8"?>
+          <rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" xmlns:dc="http://purl.org/dc/elements/1.1/">
+            <channel>
+              <title>Finite</title>
+              <link>https://ceIia.github.io/finite/appcast.xml</link>
+              <item>
+                <title>Version $VERSION</title>
+                <pubDate>$DATE</pubDate>
+                <sparkle:version>$(git rev-list --count HEAD)</sparkle:version>
+                <sparkle:shortVersionString>$VERSION</sparkle:shortVersionString>
+                <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
+                <enclosure url="https://github.com/ceIia/finite/releases/download/v${VERSION}/Finite-${VERSION}.dmg"
+                  $sparkle_signature
+                  length="$DMG_SIZE"
+                  type="application/octet-stream" />
+              </item>
+            </channel>
+          </rss>
+          APPCAST_EOF
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+
+          # Rename DMG to include version
+          mv "$dmg_path" "$RUNNER_TEMP/Finite-${VERSION}.dmg"
+
+          PRERELEASE_FLAG=""
+          if [[ "$VERSION" == *-* ]]; then
+            PRERELEASE_FLAG="--prerelease"
+          fi
+
+          gh release create "v${VERSION}" \
+            --title "Finite v${VERSION}" \
+            --generate-notes \
+            $PRERELEASE_FLAG \
+            "$RUNNER_TEMP/Finite-${VERSION}.dmg" \
+            "$RUNNER_TEMP/appcast.xml"
+
+      - name: Update appcast on GitHub Pages
+        if: ${{ !contains(github.ref, '-') }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Clone gh-pages branch, update appcast, push
+          git clone --branch gh-pages --single-branch \
+            "https://x-access-token:${GH_TOKEN}@github.com/ceIia/finite.git" \
+            gh-pages-dir 2>/dev/null || {
+            # If gh-pages doesn't exist yet, create it
+            mkdir gh-pages-dir && cd gh-pages-dir && git init
+            git checkout -b gh-pages
+            git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/ceIia/finite.git"
+          }
+
+          cp "$RUNNER_TEMP/appcast.xml" gh-pages-dir/appcast.xml
+          cd gh-pages-dir
+          git add appcast.xml
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git commit -m "Update appcast for v${GITHUB_REF#refs/tags/v}" || true
+          git push origin gh-pages
+
+      - name: Cleanup keychain
+        if: always()
+        run: |
+          security delete-keychain $RUNNER_TEMP/app-signing.keychain-db 2>/dev/null || true

@@ -20,7 +20,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var minimapView: MinimapView!
     private var sidebarToggleButton: SidebarToggleButton!
     private var newTerminalButton: NewTerminalButton!
-    private var updateBanner: UpdateBannerView!
     private var sidebarToggleLeading: NSLayoutConstraint!
     private var sidebarLeading: NSLayoutConstraint!
     private var isConfirmedClose = false
@@ -74,6 +73,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         sidebarModel = SidebarModel()
         sidebarModel.onSelectNode = { [weak self] node, mods in
             self?.nodeManager.handleClick(node, modifiers: mods)
+            self?.ensureNodeVisible(node)
+        }
+        sidebarModel.onPanToNode = { [weak self] node in
+            self?.nodeManager.handleClick(node, modifiers: [])
+            self?.panToNode(node)
         }
         sidebarModel.onHoverPulse = { [weak self] node in
             node.pulse()
@@ -179,33 +183,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             newTerminalButton.widthAnchor.constraint(equalToConstant: 28),
             newTerminalButton.heightAnchor.constraint(equalToConstant: 28),
         ])
-
-        // Update banner (centered at top, hidden by default)
-        updateBanner = UpdateBannerView()
-        updateBanner.translatesAutoresizingMaskIntoConstraints = false
-        updateBanner.isHidden = true
-        container.addSubview(updateBanner)
-        NSLayoutConstraint.activate([
-            updateBanner.topAnchor.constraint(equalTo: container.safeAreaLayoutGuide.topAnchor, constant: 6),
-            updateBanner.centerXAnchor.constraint(equalTo: container.centerXAnchor),
-            updateBanner.widthAnchor.constraint(lessThanOrEqualTo: container.widthAnchor, multiplier: 0.6),
-        ])
-
-        updateBanner.onUpdate = {
-            UpdateManager.shared.installUpdate()
-        }
-        updateBanner.onDismiss = { [weak self] in
-            UpdateManager.shared.dismiss()
-            self?.updateBanner.hide()
-        }
-
-        UpdateManager.shared.onUpdateAvailable = { [weak self] sha in
-            self?.updateBanner.show(sha: sha)
-        }
-        UpdateManager.shared.onUpdateDismissed = { [weak self] in
-            self?.updateBanner.hide()
-        }
-        UpdateManager.shared.startWatching()
 
         // Intercept shortcuts that can't be handled by the menu system:
         // - Escape (conditional on selection count, no menu equivalent)
@@ -374,6 +351,28 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
+    @objc func showAbout(_ sender: Any?) {
+        let ghosttyCommit = Bundle.main.infoDictionary?["GhosttyCommit"] as? String ?? "unknown"
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
+        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "?"
+
+        let credits = NSAttributedString(
+            string: "Ghostty: \(ghosttyCommit)\nVersion \(version) (\(build))",
+            attributes: [
+                .font: NSFont.monospacedSystemFont(ofSize: 11, weight: .regular),
+                .foregroundColor: NSColor.secondaryLabelColor,
+            ]
+        )
+
+        NSApp.orderFrontStandardAboutPanel(options: [
+            .credits: credits,
+        ])
+    }
+
+    @objc func checkForUpdates(_ sender: Any?) {
+        SparkleUpdater.shared.checkForUpdates()
+    }
+
     @objc func toggleSidebarPanel(_ sender: Any?) {
         if sidebarOverlay.isHidden {
             sidebarOverlay.isHidden = false
@@ -453,7 +452,28 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         )
 
         NSAnimationContext.runAnimationGroup { ctx in
-            ctx.duration = 0.2
+            ctx.duration = 0.25
+            ctx.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+            ctx.allowsImplicitAnimation = true
+            self.canvasView.canvasTransform = CanvasTransform(
+                offset: newOffset,
+                scale: scale
+            )
+        }
+    }
+
+    private func panToNode(_ node: TerminalNodeView) {
+        let scale = canvasView.canvasTransform.scale
+        let targetCenter = CGPoint(x: node.frame.midX, y: node.frame.midY)
+        let newOffset = CGPoint(
+            x: targetCenter.x - canvasView.bounds.midX / scale,
+            y: targetCenter.y - canvasView.bounds.midY / scale
+        )
+
+        NSAnimationContext.runAnimationGroup { ctx in
+            ctx.duration = 0.3
+            ctx.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+            ctx.allowsImplicitAnimation = true
             self.canvasView.canvasTransform = CanvasTransform(
                 offset: newOffset,
                 scale: scale
@@ -523,7 +543,12 @@ extension AppDelegate: TerminalNodeManagerDelegate {
     }
 
     func nodeManager(_ manager: TerminalNodeManager, didCreateNode node: TerminalNodeView) { syncUI(manager) }
-    func nodeManager(_ manager: TerminalNodeManager, didRemoveNode node: TerminalNodeView) { syncUI(manager) }
+    func nodeManager(_ manager: TerminalNodeManager, didRemoveNode node: TerminalNodeView) {
+        syncUI(manager)
+        if let focused = manager.focusedNode {
+            ensureNodeVisible(focused)
+        }
+    }
     func nodeManager(_ manager: TerminalNodeManager, didFocusNode node: TerminalNodeView?) { syncUI(manager) }
     func nodeManager(_ manager: TerminalNodeManager, didUpdateTitleFor node: TerminalNodeView) { syncUI(manager) }
     func nodeManager(_ manager: TerminalNodeManager, didUpdateActivityFor node: TerminalNodeView) { syncUI(manager) }

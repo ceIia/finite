@@ -1,0 +1,94 @@
+name: Check Ghostty Updates
+
+on:
+  schedule:
+    - cron: '0 9 * * 1' # Every Monday at 9am UTC
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  check-update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check for Ghostty updates
+        id: check
+        run: |
+          cd ghostty
+          CURRENT_SHA=$(git rev-parse HEAD)
+          git fetch origin main
+          LATEST_SHA=$(git rev-parse origin/main)
+
+          if [ "$CURRENT_SHA" = "$LATEST_SHA" ]; then
+            echo "up_to_date=true" >> $GITHUB_OUTPUT
+            echo "Ghostty is up to date ($CURRENT_SHA)"
+          else
+            echo "up_to_date=false" >> $GITHUB_OUTPUT
+            echo "current_sha=${CURRENT_SHA:0:8}" >> $GITHUB_OUTPUT
+            echo "latest_sha=${LATEST_SHA:0:8}" >> $GITHUB_OUTPUT
+
+            # Get commit summary
+            SUMMARY=$(git log --oneline "$CURRENT_SHA..$LATEST_SHA" | head -20)
+            echo "Ghostty has updates: $CURRENT_SHA -> $LATEST_SHA"
+            echo "$SUMMARY"
+
+            # Save summary for PR body (handle multiline)
+            {
+              echo "commit_summary<<EOF"
+              echo "$SUMMARY"
+              echo "EOF"
+            } >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create update branch and PR
+        if: steps.check.outputs.up_to_date == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH="ghostty-update/${{ steps.check.outputs.latest_sha }}"
+
+          # Check if PR already exists
+          EXISTING=$(gh pr list --head "$BRANCH" --json number --jq '.[0].number' 2>/dev/null || echo "")
+          if [ -n "$EXISTING" ]; then
+            echo "PR #$EXISTING already exists for this update"
+            exit 0
+          fi
+
+          # Update submodule
+          cd ghostty
+          git checkout origin/main
+          cd ..
+
+          # Create branch and commit
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git add ghostty
+          git commit -m "chore: bump ghostty to ${{ steps.check.outputs.latest_sha }}"
+          git push origin "$BRANCH"
+
+          # Create PR
+          gh pr create \
+            --title "Bump Ghostty (${{ steps.check.outputs.current_sha }} -> ${{ steps.check.outputs.latest_sha }})" \
+            --body "$(cat <<'PR_EOF'
+          ## Ghostty submodule update
+
+          **${{ steps.check.outputs.current_sha }}** -> **${{ steps.check.outputs.latest_sha }}**
+
+          ### Recent commits
+          ```
+          ${{ steps.check.outputs.commit_summary }}
+          ```
+
+          > After merging, tag a release to ship the update:
+          > ```
+          > git tag v0.x.x
+          > git push origin v0.x.x
+          > ```
+          PR_EOF
+          )"

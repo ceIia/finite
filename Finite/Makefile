@@ -4,7 +4,7 @@ APP_NAME := Finite.app
 DERIVED_DATA := $(HOME)/Library/Developer/Xcode/DerivedData
 INSTALL_DIR := /Applications
 
-.PHONY: build release clean setup update-ghostty
+.PHONY: build release clean setup
 
 ## Development build
 build: setup
@@ -23,10 +23,6 @@ release: setup
 ## Run setup.sh (ensure GhosttyKit is linked)
 setup:
 	@./scripts/setup.sh
-
-## Pull latest Ghostty and rebuild framework if needed
-update-ghostty:
-	@./scripts/update-ghostty.sh
 
 ## Clean Xcode build
 clean:
