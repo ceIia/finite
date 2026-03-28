@@ -24,9 +24,9 @@ release: setup
 setup:
 	@./scripts/setup.sh
 
-## Build, sign, notarize, and publish a release
+## Build, sign, notarize, and publish a release (use --dry-run to preview)
 distribute:
-	@../scripts/distribute.sh
+	@../scripts/distribute.sh $(ARGS)
 
 ## Clean Xcode build
 clean:

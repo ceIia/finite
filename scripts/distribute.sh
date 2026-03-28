@@ -8,11 +8,28 @@ ENV_FILE="$ROOT_DIR/.env.release"
 CERT="B38BF936E7A2BDD72ACAD34DC33AE1353A8EF33B"
 ENTITLEMENTS="$FINITE_DIR/Resources/Finite.entitlements"
 
+DRY_RUN=false
+if [[ "${1:-}" == "--dry-run" ]]; then
+    DRY_RUN=true
+fi
+
 red()   { printf "\033[1;31m%s\033[0m\n" "$*"; }
 green() { printf "\033[1;32m%s\033[0m\n" "$*"; }
 bold()  { printf "\033[1m%s\033[0m\n" "$*"; }
+dim()   { printf "\033[2m%s\033[0m\n" "$*"; }
 
 die() { red "Error: $*"; exit 1; }
+
+dry() {
+    if $DRY_RUN; then
+        dim "  [dry-run] $*"
+        return 0
+    fi
+    return 1
+}
+
+$DRY_RUN && bold "==> DRY RUN MODE — nothing will be published"
+echo ""
 
 # ── Pre-flight checks ─────────────────────────────────────────────
 
@@ -21,25 +38,35 @@ bold "==> Pre-flight checks..."
 # On main?
 BRANCH=$(git -C "$ROOT_DIR" branch --show-current)
 [ "$BRANCH" = "main" ] || die "Not on main (on $BRANCH)"
+green "  On main"
 
 # Clean working tree?
 if ! git -C "$ROOT_DIR" diff --quiet || ! git -C "$ROOT_DIR" diff --cached --quiet; then
     die "Working tree is dirty. Commit or stash changes first."
 fi
+green "  Working tree clean"
 
 # Up to date with remote?
 git -C "$ROOT_DIR" fetch origin main --quiet
 LOCAL=$(git -C "$ROOT_DIR" rev-parse HEAD)
 REMOTE=$(git -C "$ROOT_DIR" rev-parse origin/main)
 [ "$LOCAL" = "$REMOTE" ] || die "Local main ($LOCAL) differs from origin/main ($REMOTE). Push or pull first."
+green "  Up to date with origin"
 
 # Env file exists?
 [ -f "$ENV_FILE" ] || die ".env.release not found"
+green "  .env.release found"
 
 # Signing identity available?
 security find-identity -v -p codesigning 2>&1 | grep -q "$CERT" || die "Signing certificate not found in keychain"
+green "  Signing certificate found"
 
-green "  All checks passed."
+# Ghostty version
+GHOSTTY_VERSION=$(git -C "$ROOT_DIR/ghostty" describe --tags --abbrev=0 2>/dev/null || echo "unknown")
+GHOSTTY_COMMIT=$(git -C "$ROOT_DIR/ghostty" rev-parse --short HEAD 2>/dev/null || echo "unknown")
+dim "  Ghostty: $GHOSTTY_VERSION ($GHOSTTY_COMMIT)"
+
+echo ""
 
 # ── Version ────────────────────────────────────────────────────────
 
@@ -86,6 +113,18 @@ echo "$NOTES"
 echo ""
 
 # ── Confirm ────────────────────────────────────────────────────────
+
+if $DRY_RUN; then
+    bold "==> Dry run summary:"
+    echo "  Version:  v$VERSION"
+    echo "  Ghostty:  $GHOSTTY_VERSION ($GHOSTTY_COMMIT)"
+    echo "  Build:    $(git -C "$ROOT_DIR" rev-list --count HEAD)"
+    echo ""
+    echo "  Would: build → sign → DMG → notarize → tag → release → appcast"
+    echo ""
+    green "==> Dry run complete. Run without --dry-run to release."
+    exit 0
+fi
 
 printf "  Release v%s? [y/N] " "$VERSION"
 read -r CONFIRM

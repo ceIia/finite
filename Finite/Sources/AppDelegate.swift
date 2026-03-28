@@ -352,12 +352,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @objc func showAbout(_ sender: Any?) {
+        let ghosttyVersion = Bundle.main.infoDictionary?["GhosttyVersion"] as? String ?? "unknown"
         let ghosttyCommit = Bundle.main.infoDictionary?["GhosttyCommit"] as? String ?? "unknown"
         let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
         let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "?"
 
         let credits = NSAttributedString(
-            string: "Ghostty: \(ghosttyCommit)\nVersion \(version) (\(build))",
+            string: "Ghostty \(ghosttyVersion) (\(ghosttyCommit))\nFinite \(version) (\(build))",
             attributes: [
                 .font: NSFont.monospacedSystemFont(ofSize: 11, weight: .regular),
                 .foregroundColor: NSColor.secondaryLabelColor,

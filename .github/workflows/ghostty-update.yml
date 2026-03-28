@@ -20,31 +20,36 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Check for Ghostty updates
+      - name: Check for Ghostty release updates
         id: check
         run: |
           cd ghostty
-          CURRENT_SHA=$(git rev-parse HEAD)
-          git fetch origin main
-          LATEST_SHA=$(git rev-parse origin/main)
+          git fetch origin --tags
 
-          if [ "$CURRENT_SHA" = "$LATEST_SHA" ]; then
+          CURRENT_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "none")
+          CURRENT_SHA=$(git rev-parse --short HEAD)
+
+          # Find the latest release tag (vX.Y.Z format)
+          LATEST_TAG=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -1)
+          LATEST_SHA=$(git rev-parse --short "$LATEST_TAG" 2>/dev/null || echo "unknown")
+
+          echo "Current: $CURRENT_TAG ($CURRENT_SHA)"
+          echo "Latest release: $LATEST_TAG ($LATEST_SHA)"
+
+          if git merge-base --is-ancestor "$LATEST_TAG" HEAD; then
             echo "up_to_date=true" >> $GITHUB_OUTPUT
-            echo "Ghostty is up to date ($CURRENT_SHA)"
+            echo "Already on or ahead of $LATEST_TAG"
           else
             echo "up_to_date=false" >> $GITHUB_OUTPUT
-            echo "current_sha=${CURRENT_SHA:0:8}" >> $GITHUB_OUTPUT
-            echo "latest_sha=${LATEST_SHA:0:8}" >> $GITHUB_OUTPUT
+            echo "current_tag=$CURRENT_TAG" >> $GITHUB_OUTPUT
+            echo "current_sha=$CURRENT_SHA" >> $GITHUB_OUTPUT
+            echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
+            echo "latest_sha=$LATEST_SHA" >> $GITHUB_OUTPUT
 
-            # Get commit summary
-            SUMMARY=$(git log --oneline "$CURRENT_SHA..$LATEST_SHA" | head -20)
-            echo "Ghostty has updates: $CURRENT_SHA -> $LATEST_SHA"
-            echo "$SUMMARY"
-
-            # Save summary for PR body (handle multiline)
+            # Get changelog between current and latest release
             {
               echo "commit_summary<<EOF"
-              echo "$SUMMARY"
+              git log --oneline HEAD.."$LATEST_TAG" | head -30
               echo "EOF"
             } >> $GITHUB_OUTPUT
           fi
@@ -54,7 +59,8 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          BRANCH="ghostty-update/${{ steps.check.outputs.latest_sha }}"
+          LATEST_TAG="${{ steps.check.outputs.latest_tag }}"
+          BRANCH="ghostty-update/${LATEST_TAG}"
 
           # Check if PR already exists
           EXISTING=$(gh pr list --head "$BRANCH" --json number --jq '.[0].number' 2>/dev/null || echo "")
@@ -63,9 +69,9 @@ jobs:
             exit 0
           fi
 
-          # Update submodule
+          # Checkout the release tag
           cd ghostty
-          git checkout origin/main
+          git checkout "$LATEST_TAG"
           cd ..
 
           # Create branch and commit
@@ -73,26 +79,23 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git checkout -b "$BRANCH"
           git add ghostty
-          git commit -m "chore: bump ghostty to ${{ steps.check.outputs.latest_sha }}"
+          git commit -m "chore: bump ghostty to $LATEST_TAG"
           git push origin "$BRANCH"
 
           # Create PR
           gh pr create \
-            --title "Bump Ghostty (${{ steps.check.outputs.current_sha }} -> ${{ steps.check.outputs.latest_sha }})" \
-            --body "$(cat <<'PR_EOF'
-          ## Ghostty submodule update
+            --title "Bump Ghostty to $LATEST_TAG" \
+            --body "$(cat <<PR_EOF
+          ## Ghostty ${{ steps.check.outputs.current_tag }} -> $LATEST_TAG
 
-          **${{ steps.check.outputs.current_sha }}** -> **${{ steps.check.outputs.latest_sha }}**
-
-          ### Recent commits
-          ```
+          ### Changes
+          \`\`\`
           ${{ steps.check.outputs.commit_summary }}
-          ```
+          \`\`\`
 
-          > After merging, tag a release to ship the update:
-          > ```
-          > git tag v0.x.x
-          > git push origin v0.x.x
-          > ```
+          After merging, release with:
+          \`\`\`
+          cd Finite && make distribute
+          \`\`\`
           PR_EOF
           )"

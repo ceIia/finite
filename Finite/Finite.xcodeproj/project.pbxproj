@@ -283,7 +283,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "GHOSTTY_DIR=\"${PROJECT_DIR}/../ghostty\"\nif [ -e \"$GHOSTTY_DIR/.git\" ]; then\n    COMMIT=$(git -C \"$GHOSTTY_DIR\" rev-parse --short HEAD 2>/dev/null || echo \"unknown\")\nelse\n    COMMIT=\"unknown\"\nfi\n/usr/libexec/PlistBuddy -c \"Set :GhosttyCommit $COMMIT\" \"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\n";
+			shellScript = "GHOSTTY_DIR=\"${PROJECT_DIR}/../ghostty\"\nif [ -e \"$GHOSTTY_DIR/.git\" ]; then\n    COMMIT=$(git -C \"$GHOSTTY_DIR\" rev-parse --short HEAD 2>/dev/null || echo \"unknown\")\n    VERSION=$(git -C \"$GHOSTTY_DIR\" describe --tags --abbrev=0 2>/dev/null || echo \"unknown\")\nelse\n    COMMIT=\"unknown\"\n    VERSION=\"unknown\"\nfi\n/usr/libexec/PlistBuddy -c \"Set :GhosttyCommit $COMMIT\" \"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\n/usr/libexec/PlistBuddy -c \"Set :GhosttyVersion $VERSION\" \"${TARGET_BUILD_DIR}/${INFOPLIST_PATH}\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
