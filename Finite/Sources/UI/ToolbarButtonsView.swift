@@ -62,7 +62,7 @@ private struct GlassIconButton: View {
 extension View {
     @ViewBuilder
     func glassOrMaterial(shape: GlassFallbackShape) -> some View {
-        #if canImport(GlassEffect)
+        #if compiler(>=6.2)
         if #available(macOS 26.0, *) {
             switch shape {
             case .circle:
