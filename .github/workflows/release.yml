@@ -164,40 +164,12 @@ jobs:
           SIGNATURE=$(echo "$SPARKLE_SIGNING_KEY" | ./sparkle-tools/bin/sign_update "$dmg_path")
           echo "sparkle_signature=$SIGNATURE" >> $GITHUB_ENV
 
-      - name: Generate appcast item
-        run: |
-          VERSION=${GITHUB_REF#refs/tags/v}
-          DMG_SIZE=$(stat -f%z "$dmg_path")
-          DATE=$(date -R)
-
-          cat > "$RUNNER_TEMP/appcast.xml" << APPCAST_EOF
-          <?xml version="1.0" encoding="utf-8"?>
-          <rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" xmlns:dc="http://purl.org/dc/elements/1.1/">
-            <channel>
-              <title>Finite</title>
-              <link>https://ceIia.github.io/finite/appcast.xml</link>
-              <item>
-                <title>Version $VERSION</title>
-                <pubDate>$DATE</pubDate>
-                <sparkle:version>$(git rev-list --count HEAD)</sparkle:version>
-                <sparkle:shortVersionString>$VERSION</sparkle:shortVersionString>
-                <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
-                <enclosure url="https://github.com/ceIia/finite/releases/download/v${VERSION}/Finite-${VERSION}.dmg"
-                  $sparkle_signature
-                  length="$DMG_SIZE"
-                  type="application/octet-stream" />
-              </item>
-            </channel>
-          </rss>
-          APPCAST_EOF
-
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           VERSION=${GITHUB_REF#refs/tags/v}
 
-          # Rename DMG to include version
           mv "$dmg_path" "$RUNNER_TEMP/Finite-${VERSION}.dmg"
 
           PRERELEASE_FLAG=""
@@ -209,8 +181,45 @@ jobs:
             --title "Finite v${VERSION}" \
             --generate-notes \
             $PRERELEASE_FLAG \
-            "$RUNNER_TEMP/Finite-${VERSION}.dmg" \
-            "$RUNNER_TEMP/appcast.xml"
+            "$RUNNER_TEMP/Finite-${VERSION}.dmg"
+
+      - name: Generate appcast
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          DMG_PATH="$RUNNER_TEMP/Finite-${VERSION}.dmg"
+          DMG_SIZE=$(stat -f%z "$DMG_PATH")
+          DATE=$(date -R)
+          BUILD=$(git rev-list --count HEAD)
+
+          # Pull the auto-generated release notes and convert to HTML
+          NOTES_HTML=$(gh release view "v${VERSION}" --json body -q '.body' | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/$/<br\/>/g')
+
+          cat > "$RUNNER_TEMP/appcast.xml" << APPCAST_EOF
+          <?xml version="1.0" encoding="utf-8"?>
+          <rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" xmlns:dc="http://purl.org/dc/elements/1.1/">
+            <channel>
+              <title>Finite</title>
+              <link>https://ceIia.github.io/finite/appcast.xml</link>
+              <item>
+                <title>Version $VERSION</title>
+                <pubDate>$DATE</pubDate>
+                <sparkle:version>$BUILD</sparkle:version>
+                <sparkle:shortVersionString>$VERSION</sparkle:shortVersionString>
+                <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
+                <description><![CDATA[$NOTES_HTML]]></description>
+                <enclosure url="https://github.com/ceIia/finite/releases/download/v${VERSION}/Finite-${VERSION}.dmg"
+                  $sparkle_signature
+                  length="$DMG_SIZE"
+                  type="application/octet-stream" />
+              </item>
+            </channel>
+          </rss>
+          APPCAST_EOF
+
+          # Also upload appcast to the release
+          gh release upload "v${VERSION}" "$RUNNER_TEMP/appcast.xml" --clobber
 
       - name: Update appcast on GitHub Pages
         if: ${{ !contains(github.ref, '-') }}
