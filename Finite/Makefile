@@ -4,7 +4,7 @@ APP_NAME := Finite.app
 DERIVED_DATA := $(HOME)/Library/Developer/Xcode/DerivedData
 INSTALL_DIR := /Applications
 
-.PHONY: build release clean setup
+.PHONY: build release clean setup distribute
 
 ## Development build
 build: setup
@@ -23,6 +23,10 @@ release: setup
 ## Run setup.sh (ensure GhosttyKit is linked)
 setup:
 	@./scripts/setup.sh
+
+## Build, sign, notarize, and publish a release
+distribute:
+	@../scripts/distribute.sh
 
 ## Clean Xcode build
 clean:
