@@ -12,7 +12,6 @@
       <description><![CDATA[- chore: fix update signing<br/>]]></description>
       <enclosure url="https://github.com/ceIia/finite/releases/download/v0.1.2/Finite-0.1.2.dmg"
         sparkle:edSignature="4y4a/JSArAFWsuwZB16h8+/lrU7kJyKLOqXvFK6UBh1R1Y+kU8Np1bAVHh7f6kJfwoCFhpZNw83l6G273rd4Ag==" length="13259689"
-        length="13259689"
         type="application/octet-stream" />
     </item>
   </channel>
