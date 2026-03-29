@@ -55,7 +55,12 @@ green "  Up to date with origin"
 
 # Env file exists?
 [ -f "$ENV_FILE" ] || die ".env.release not found"
+source "$ENV_FILE"
 green "  .env.release found"
+
+# Sparkle signing key?
+[ -n "${SPARKLE_SIGNING_KEY:-}" ] || die "SPARKLE_SIGNING_KEY not set (add it to .env.release or export it)"
+green "  Sparkle signing key found"
 
 # Signing identity available?
 security find-identity -v -p codesigning 2>&1 | grep -q "$CERT" || die "Signing certificate not found in keychain"
@@ -173,7 +178,6 @@ sleep 1
 # ── Notarize ───────────────────────────────────────────────────────
 
 bold "==> Notarizing (this may take a few minutes)..."
-source "$ENV_FILE"
 
 xcrun notarytool submit "$DMG_PATH" \
     --key "$APPLE_NOTARIZATION_KEY_PATH" \
@@ -209,8 +213,22 @@ gh release create "v${VERSION}" \
 if [[ "$VERSION" != *-* ]]; then
     bold "==> Updating appcast..."
 
+    # Download Sparkle tools if needed
+    SPARKLE_TOOLS_DIR="$ROOT_DIR/sparkle-tools"
+    if [ ! -x "$SPARKLE_TOOLS_DIR/bin/sign_update" ]; then
+        bold "  Downloading Sparkle tools..."
+        SPARKLE_VERSION="2.9.0"
+        curl -sL "https://github.com/sparkle-project/Sparkle/releases/download/${SPARKLE_VERSION}/Sparkle-for-Swift-Package-Manager.zip" \
+            -o /tmp/sparkle-tools.zip
+        unzip -qo /tmp/sparkle-tools -d "$SPARKLE_TOOLS_DIR"
+        rm /tmp/sparkle-tools.zip
+    fi
+
     # Sign for Sparkle
-    SPARKLE_SIG=$(echo "$SPARKLE_SIGNING_KEY" 2>/dev/null | sparkle-tools/bin/sign_update "$DMG_PATH" 2>/dev/null || echo "")
+    SPARKLE_SIG=$(echo "$SPARKLE_SIGNING_KEY" | "$SPARKLE_TOOLS_DIR/bin/sign_update" "$DMG_PATH")
+    [ -n "$SPARKLE_SIG" ] || die "Sparkle signing failed — empty signature"
+    echo "$SPARKLE_SIG" | grep -q "edSignature" || die "Sparkle signing output missing edSignature"
+    green "  Sparkle signature generated."
 
     DMG_SIZE=$(stat -f%z "$DMG_PATH")
     DATE=$(date -R)

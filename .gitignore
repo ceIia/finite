@@ -22,5 +22,8 @@ Finite/Resources/ghostty/
 .env*
 *.p8
 
+# Sparkle tools (downloaded by distribute.sh)
+sparkle-tools/
+
 # Claude
 .claude/
