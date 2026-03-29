@@ -4,20 +4,15 @@
     <title>Finite</title>
     <link>https://ceIia.github.io/finite/appcast.xml</link>
     <item>
-      <title>Version 0.1.1</title>
-      <pubDate>Sun, 29 Mar 2026 14:47:17 +0200</pubDate>
-      <sparkle:version>25</sparkle:version>
-      <sparkle:shortVersionString>0.1.1</sparkle:shortVersionString>
+      <title>Version 0.1.2</title>
+      <pubDate>Sun, 29 Mar 2026 16:29:02 +0200</pubDate>
+      <sparkle:version>26</sparkle:version>
+      <sparkle:shortVersionString>0.1.2</sparkle:shortVersionString>
       <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
-      <description><![CDATA[- Track Ghostty releases instead of main, add dry-run to distribute<br/>
-- Add local release flow and fix Ghostty update workflow permissions<br/>
-- Show commit changelog in Sparkle update dialog<br/>
-- fix: use compiler version check instead of canImport for glassEffect<br/>
-- Clean up README install section<br/>
-- fix: liquid glass fallback handling on macOS &lt;26<br/>]]></description>
-      <enclosure url="https://github.com/ceIia/finite/releases/download/v0.1.1/Finite-0.1.1.dmg"
-        
-        length="13281277"
+      <description><![CDATA[- chore: fix update signing<br/>]]></description>
+      <enclosure url="https://github.com/ceIia/finite/releases/download/v0.1.2/Finite-0.1.2.dmg"
+        sparkle:edSignature="4y4a/JSArAFWsuwZB16h8+/lrU7kJyKLOqXvFK6UBh1R1Y+kU8Np1bAVHh7f6kJfwoCFhpZNw83l6G273rd4Ag==" length="13259689"
+        length="13259689"
         type="application/octet-stream" />
     </item>
   </channel>
