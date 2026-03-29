@@ -211,7 +211,6 @@ jobs:
                 <description><![CDATA[$NOTES_HTML]]></description>
                 <enclosure url="https://github.com/ceIia/finite/releases/download/v${VERSION}/Finite-${VERSION}.dmg"
                   $sparkle_signature
-                  length="$DMG_SIZE"
                   type="application/octet-stream" />
               </item>
             </channel>

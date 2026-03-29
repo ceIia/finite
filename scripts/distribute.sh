@@ -251,7 +251,6 @@ if [[ "$VERSION" != *-* ]]; then
       <description><![CDATA[$NOTES_HTML]]></description>
       <enclosure url="https://github.com/ceIia/finite/releases/download/v${VERSION}/Finite-${VERSION}.dmg"
         $SPARKLE_SIG
-        length="$DMG_SIZE"
         type="application/octet-stream" />
     </item>
   </channel>
