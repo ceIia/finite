@@ -4,11 +4,19 @@ APP_NAME := Finite.app
 DERIVED_DATA := $(HOME)/Library/Developer/Xcode/DerivedData
 INSTALL_DIR := /Applications
 
-.PHONY: build release clean setup distribute
+.PHONY: build run release clean setup distribute
 
-## Development build
+CODESIGN_OVERRIDE := CODE_SIGN_IDENTITY=- CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
+
+## Development build (unsigned)
 build: setup
-	xcodebuild -project $(XCODEPROJ) -scheme $(SCHEME) -configuration Debug build
+	xcodebuild -project $(XCODEPROJ) -scheme $(SCHEME) -configuration Debug build $(CODESIGN_OVERRIDE)
+
+## Build and run
+run: build
+	@APP=$$(find $(DERIVED_DATA) -path "*/Finite-*/Build/Products/Debug/$(APP_NAME)" -maxdepth 5 2>/dev/null | head -1); \
+	if [ -z "$$APP" ]; then echo "Error: could not find built $(APP_NAME)"; exit 1; fi; \
+	open "$$APP"
 
 ## Release build + copy to /Applications
 release: setup

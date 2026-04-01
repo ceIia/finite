@@ -29,6 +29,8 @@
 		A100000019 /* SparkleUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000001D /* SparkleUpdater.swift */; };
 		A100000017 /* terminfo in Resources */ = {isa = PBXBuildFile; fileRef = B10000001B /* terminfo */; };
 		A100000018 /* ghostty in Resources */ = {isa = PBXBuildFile; fileRef = B10000001C /* ghostty */; };
+		A10000001F /* Workspace.swift in Sources */ = {isa = PBXBuildFile; fileRef = B10000001F /* Workspace.swift */; };
+		A100000020 /* WorkspaceManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B100000020 /* WorkspaceManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -59,6 +61,8 @@
 		B10000001E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B10000001B /* terminfo */ = {isa = PBXFileReference; lastKnownFileType = folder; path = terminfo; sourceTree = "<group>"; };
 		B10000001C /* ghostty */ = {isa = PBXFileReference; lastKnownFileType = folder; path = ghostty; sourceTree = "<group>"; };
+		B10000001F /* Workspace.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Workspace.swift; sourceTree = "<group>"; };
+		B100000020 /* WorkspaceManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -98,6 +102,7 @@
 				E100000003 /* Canvas */,
 				E100000004 /* Terminal */,
 				E100000005 /* Sidebar */,
+				E10000000A /* Workspace */,
 				E100000009 /* UI */,
 			);
 			path = Sources;
@@ -170,6 +175,15 @@
 				B100000018 /* ToolbarButtonsView.swift */,
 			);
 			path = UI;
+			sourceTree = "<group>";
+		};
+		E10000000A /* Workspace */ = {
+			isa = PBXGroup;
+			children = (
+				B10000001F /* Workspace.swift */,
+				B100000020 /* WorkspaceManager.swift */,
+			);
+			path = Workspace;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -261,6 +275,8 @@
 				A100000013 /* SnapGuideEngine.swift in Sources */,
 				A100000014 /* ToolbarButtonsView.swift in Sources */,
 				A100000019 /* SparkleUpdater.swift in Sources */,
+				A10000001F /* Workspace.swift in Sources */,
+				A100000020 /* WorkspaceManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

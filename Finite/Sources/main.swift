@@ -51,6 +51,17 @@ terminalMenu.addItem(NSMenuItem.separator())
 let closeItem = terminalMenu.addItem(withTitle: "Close Terminal", action: #selector(AppDelegate.closeTerminal(_:)), keyEquivalent: "w")
 closeItem.keyEquivalentModifierMask = [.command]
 
+terminalMenu.addItem(NSMenuItem.separator())
+
+let newWSItem = terminalMenu.addItem(withTitle: "New Workspace", action: #selector(AppDelegate.newWorkspace(_:)), keyEquivalent: "n")
+newWSItem.keyEquivalentModifierMask = [.command, .shift]
+
+let nextWSItem = terminalMenu.addItem(withTitle: "Next Workspace", action: #selector(AppDelegate.nextWorkspace(_:)), keyEquivalent: "]")
+nextWSItem.keyEquivalentModifierMask = [.command, .shift]
+
+let prevWSItem = terminalMenu.addItem(withTitle: "Previous Workspace", action: #selector(AppDelegate.previousWorkspace(_:)), keyEquivalent: "[")
+prevWSItem.keyEquivalentModifierMask = [.command, .shift]
+
 terminalMenuItem.submenu = terminalMenu
 
 // -- View menu --

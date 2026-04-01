@@ -95,6 +95,26 @@ class CanvasView: NSView {
         gridView?.needsDisplay = true
     }
 
+    /// Remove all terminal nodes from the view hierarchy without destroying them.
+    func detachAllNodes() {
+        for node in terminalNodes {
+            node.removeFromSuperview()
+        }
+        terminalNodes.removeAll()
+        gridView?.needsDisplay = true
+    }
+
+    /// Add pre-existing terminal nodes back into the view hierarchy.
+    func attachNodes(_ nodes: [TerminalNodeView]) {
+        for node in nodes {
+            terminalNodes.append(node)
+            addSubview(node)
+            node.canvasView = self
+            node.terminalView.canvasView = self
+        }
+        gridView?.needsDisplay = true
+    }
+
     func bringNodeToFront(_ node: TerminalNodeView) {
         guard let idx = terminalNodes.firstIndex(where: { $0 === node }) else { return }
         terminalNodes.remove(at: idx)

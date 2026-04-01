@@ -36,7 +36,6 @@ class TerminalNodeManager {
     init(canvasView: CanvasView, window: NSWindow) {
         self.canvasView = canvasView
         self.window = window
-        canvasView.nodeManager = self
     }
 
     // MARK: - Node Creation
