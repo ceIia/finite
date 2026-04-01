@@ -27,6 +27,9 @@ class CanvasView: NSView {
     private var marqueeStart: CGPoint?
     private(set) var marqueeRect: NSRect?
 
+    /// Middle-mouse drag panning state.
+    private var middleMousePanStart: NSPoint?
+
     // MARK: - Scroll State Machine
 
     private enum ScrollTarget {
@@ -254,6 +257,29 @@ class CanvasView: NSView {
         let intersecting = terminalNodes.filter { $0.frame.intersects(rect) }
         let cmdHeld = event.modifierFlags.contains(.command)
         manager.marqueeSelect(nodes: intersecting, toggle: cmdHeld)
+    }
+
+    // MARK: - Middle Mouse Drag (pan canvas, Figma-style)
+
+    override func otherMouseDown(with event: NSEvent) {
+        guard event.buttonNumber == 2 else { return super.otherMouseDown(with: event) }
+        middleMousePanStart = event.locationInWindow
+        NSCursor.closedHand.push()
+    }
+
+    override func otherMouseDragged(with event: NSEvent) {
+        guard event.buttonNumber == 2, middleMousePanStart != nil else {
+            return super.otherMouseDragged(with: event)
+        }
+        canvasTransform.pan(by: CGPoint(x: -event.deltaX, y: event.deltaY))
+    }
+
+    override func otherMouseUp(with event: NSEvent) {
+        guard event.buttonNumber == 2, middleMousePanStart != nil else {
+            return super.otherMouseUp(with: event)
+        }
+        middleMousePanStart = nil
+        NSCursor.pop()
     }
 
     func zoomToFitAll(sidebarWidth: CGFloat = 0) {
