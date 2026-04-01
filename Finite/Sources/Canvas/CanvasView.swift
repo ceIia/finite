@@ -305,6 +305,15 @@ class CanvasView: NSView {
             scrollTarget = .canvas
         }
 
+        // Cmd+scroll: zoom in/out using vertical scroll delta
+        if event.modifierFlags.contains(.command) {
+            let anchor = convert(event.locationInWindow, from: nil)
+            let zoomSensitivity: CGFloat = 0.01
+            let factor = 1.0 + event.scrollingDeltaY * zoomSensitivity
+            canvasTransform.zoom(by: factor, anchor: anchor)
+            return
+        }
+
         // Route based on target
         switch scrollTarget {
         case .undecided:
