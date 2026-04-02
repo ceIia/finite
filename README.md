@@ -40,7 +40,7 @@ make release  # release build, installs to /Applications
 
 ### Canvas
 
-The canvas is infinite. Pan with the trackpad, scroll wheel, or middle-mouse drag (like Figma). Zoom with pinch gestures. Double-click empty space to zoom to fit all terminals.
+The canvas is infinite. Pan with the trackpad, scroll wheel, or middle-mouse drag. Zoom with pinch gestures. Double-click empty space to zoom to fit all terminals.
 
 Scroll direction is detected automatically: horizontal scrolling pans the canvas, vertical scrolling goes to the terminal under the cursor. Hold `Ctrl` to force canvas panning.
 
