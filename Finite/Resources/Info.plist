@@ -26,6 +26,8 @@
 	<string>Helm</string>
 	<key>NSDownloadsFolderUsageDescription</key>
 	<string>Finite may need access to your Downloads folder when a terminal session uses it as a working directory.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Finite needs microphone access for voice input in terminal applications like Claude Code.</string>
 	<key>GhosttyVersion</key>
 	<string>dev</string>
 	<key>GhosttyCommit</key>
