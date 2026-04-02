@@ -78,9 +78,22 @@ Drag terminals by their title bar, or `Opt+Drag` from anywhere on the terminal. 
 | `Cmd+Opt+F` | Zoom to fit focused terminal |
 | `Cmd+Opt+0` | Zoom to fit all |
 
+### Workspaces
+
+Workspaces let you group terminals into separate canvases. Each workspace has its own terminals, layout, and zoom level. All workspaces stay live in memory for instant switching.
+
+| Action | Shortcut |
+|---|---|
+| New Workspace | `Cmd+Shift+N` |
+| Next Workspace | `Cmd+Shift+]` |
+| Previous Workspace | `Cmd+Shift+[` |
+| Switch to Workspace 1–9 | `Cmd+1` … `Cmd+9` |
+
+Workspaces are listed in the sidebar above the terminal list. Click to switch, right-click to rename or delete.
+
 ### Sidebar
 
-Toggle with `Cmd+Opt+S`. Lists all terminals with status indicators: focused (blue), selected (faded blue), activity (pulsing orange), running process (bolt icon). Hovering a row briefly pulses the terminal on the canvas.
+Toggle with `Cmd+Opt+S`. Shows workspaces at the top and the active workspace's terminals below. Terminal status indicators: focused (blue), selected (faded blue), activity (pulsing orange), running process (bolt icon). Hovering a row briefly pulses the terminal on the canvas.
 
 ### Minimap
 
@@ -97,6 +110,10 @@ Window position, canvas transform, terminal layout, and working directories are 
 | `Cmd+N` | New Terminal |
 | `Cmd+Shift+D` | Duplicate Terminal |
 | `Cmd+W` | Close Terminal |
+| `Cmd+Shift+N` | New Workspace |
+| `Cmd+Shift+]` | Next Workspace |
+| `Cmd+Shift+[` | Previous Workspace |
+| `Cmd+1` … `Cmd+9` | Switch to Workspace 1–9 |
 | `Cmd+Opt+S` | Toggle Sidebar |
 | `Cmd+Opt+M` | Toggle Minimap |
 | `Cmd+Opt+0` | Zoom to Fit All |

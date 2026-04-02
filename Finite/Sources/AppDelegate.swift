@@ -14,7 +14,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // for NSApplicationDelegate when not using storyboards.
     private var window: NSWindow!
     private var canvasView: CanvasView!
-    private var nodeManager: TerminalNodeManager!
+    private var workspaceManager: WorkspaceManager!
     private var sidebarModel: SidebarModel!
     private var sidebarOverlay: SidebarOverlayView!
     private var minimapView: MinimapView!
@@ -26,6 +26,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var processStateTimer: Timer?
     private var cachedProcessStates: [Bool] = []
     private var keyboardMonitor: Any?
+
+    private var activeNodeManager: TerminalNodeManager {
+        workspaceManager.activeWorkspace.nodeManager
+    }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Initialize the Ghostty runtime (config, app, callbacks)
@@ -65,18 +69,18 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         gridView.canvasView = canvasView
         container.addSubview(canvasView)
 
-        // Create node manager
-        nodeManager = TerminalNodeManager(canvasView: canvasView, window: window)
-        nodeManager.delegate = self
+        // Create workspace manager
+        workspaceManager = WorkspaceManager(canvasView: canvasView, window: window)
+        workspaceManager.delegate = self
 
         // Create sidebar model
         sidebarModel = SidebarModel()
         sidebarModel.onSelectNode = { [weak self] node, mods in
-            self?.nodeManager.handleClick(node, modifiers: mods)
+            self?.activeNodeManager.handleClick(node, modifiers: mods)
             self?.ensureNodeVisible(node)
         }
         sidebarModel.onPanToNode = { [weak self] node in
-            self?.nodeManager.handleClick(node, modifiers: [])
+            self?.activeNodeManager.handleClick(node, modifiers: [])
             self?.panToNode(node)
         }
         sidebarModel.onHoverPulse = { [weak self] node in
@@ -87,10 +91,31 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             self?.closeSelectedTerminals()
         }
         sidebarModel.onCloseSingle = { [weak self] node in
-            self?.nodeManager.requestCloseNode(node)
+            self?.activeNodeManager.requestCloseNode(node)
         }
         sidebarModel.onDuplicateNode = { [weak self] node in
-            self?.nodeManager.duplicateNode(node)
+            self?.activeNodeManager.duplicateNode(node)
+        }
+        sidebarModel.onSelectWorkspace = { [weak self] id in
+            guard let self else { return }
+            if let workspace = self.workspaceManager.workspaces.first(where: { $0.id == id }) {
+                self.workspaceManager.switchTo(workspace: workspace)
+            }
+        }
+        sidebarModel.onCreateWorkspace = { [weak self] in
+            self?.newWorkspace(nil)
+        }
+        sidebarModel.onDeleteWorkspace = { [weak self] id in
+            guard let self else { return }
+            if let workspace = self.workspaceManager.workspaces.first(where: { $0.id == id }) {
+                self.deleteWorkspace(workspace)
+            }
+        }
+        sidebarModel.onRenameWorkspace = { [weak self] id, name in
+            guard let self else { return }
+            if let workspace = self.workspaceManager.workspaces.first(where: { $0.id == id }) {
+                self.workspaceManager.renameWorkspace(workspace, to: name)
+            }
         }
 
         // Create sidebar overlay (glass panel inside the window)
@@ -107,13 +132,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             sidebarOverlay.heightAnchor.constraint(lessThanOrEqualTo: container.heightAnchor, multiplier: 0.6),
         ])
 
-        // Wire runtime callbacks to manager
+        // Wire runtime callbacks — surface-targeted ones route through workspaceManager
         GhosttyRuntime.shared.onSetTitle = { [weak self] surface, title in
-            self?.nodeManager.handleSetTitle(surface, title)
+            self?.workspaceManager.nodeManager(for: surface)?.handleSetTitle(surface, title)
         }
 
         GhosttyRuntime.shared.onSurfaceClosed = { [weak self] surface in
-            self?.nodeManager.handleSurfaceClosed(surface)
+            self?.workspaceManager.nodeManager(for: surface)?.handleSurfaceClosed(surface)
         }
 
         GhosttyRuntime.shared.onNewTerminal = { [weak self] in
@@ -125,23 +150,23 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         GhosttyRuntime.shared.onRender = { [weak self] surface in
-            self?.nodeManager.markActivity(for: surface)
+            self?.workspaceManager.nodeManager(for: surface)?.markActivity(for: surface)
         }
 
         GhosttyRuntime.shared.onPwdChanged = { [weak self] surface, pwd in
-            self?.nodeManager.handlePwdChanged(surface, pwd)
+            self?.workspaceManager.nodeManager(for: surface)?.handlePwdChanged(surface, pwd)
         }
 
         GhosttyRuntime.shared.onCloseSurfaceRequested = { [weak self] surface, _ in
             guard let self else { return }
-            guard let node = self.nodeManager.node(for: surface) else { return }
-            self.nodeManager.requestCloseNode(node)
+            guard let manager = self.workspaceManager.nodeManager(for: surface),
+                  let node = manager.node(for: surface) else { return }
+            manager.requestCloseNode(node)
         }
 
         // Minimap in bottom-right corner of the container
         minimapView = MinimapView(frame: .zero)
         minimapView.canvasView = canvasView
-        minimapView.nodeManager = nodeManager
         minimapView.translatesAutoresizingMaskIntoConstraints = false
         container.addSubview(minimapView)
 
@@ -193,8 +218,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             let normalizedFlags = flags.subtracting([.function, .numericPad])
 
             // Escape (keyCode 53): clear multi-selection (only if >1 selected)
-            if event.keyCode == 53 && self.nodeManager.selectedNodes.count > 1 {
-                self.nodeManager.clearSelection()
+            if event.keyCode == 53 && self.activeNodeManager.selectedNodes.count > 1 {
+                self.activeNodeManager.clearSelection()
                 return nil
             }
 
@@ -209,22 +234,57 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 }
             }
 
+            // Cmd+1…9: switch to workspace by index
+            if normalizedFlags == [.command],
+               let chars = event.charactersIgnoringModifiers,
+               let digit = chars.first?.wholeNumberValue,
+               digit >= 1 && digit <= 9 {
+                let index = digit - 1
+                if index < self.workspaceManager.workspaces.count {
+                    self.workspaceManager.switchTo(workspace: self.workspaceManager.workspaces[index])
+                    return nil
+                }
+            }
+
             return event
         }
 
-        // Restore saved state or create default terminal
-        if let state = CanvasState.load(), !state.nodes.isEmpty {
-            canvasView.canvasTransform = CanvasTransform(
-                offset: CGPoint(x: state.offsetX, y: state.offsetY),
-                scale: state.scale
-            )
-            for nodeState in state.nodes {
-                let node = nodeManager.createNode(
-                    at: CGPoint(x: nodeState.x, y: nodeState.y),
-                    size: NSSize(width: nodeState.width, height: nodeState.height),
-                    workingDirectory: nodeState.workingDirectory
-                )
-                node.title = nodeState.title
+        // Restore saved state or create default workspace with terminal
+        if let state = CanvasState.load(), let workspaceStates = state.workspaces, !workspaceStates.isEmpty {
+            let activeIdx = state.activeWorkspaceIndex ?? 0
+
+            for (i, wsState) in workspaceStates.enumerated() {
+                let wsId = UUID(uuidString: wsState.id) ?? UUID()
+                let workspace = workspaceManager.createWorkspace(id: wsId, name: wsState.name, switchTo: i == 0)
+
+                if i == 0 {
+                    // First workspace is already active, set its transform
+                    canvasView.canvasTransform = CanvasTransform(
+                        offset: CGPoint(x: wsState.offsetX, y: wsState.offsetY),
+                        scale: wsState.scale
+                    )
+                    workspace.canvasTransform = canvasView.canvasTransform
+                } else {
+                    workspace.canvasTransform = CanvasTransform(
+                        offset: CGPoint(x: wsState.offsetX, y: wsState.offsetY),
+                        scale: wsState.scale
+                    )
+                }
+
+                workspace.nodeManager.delegate = self
+                for nodeState in wsState.nodes {
+                    let node = workspace.nodeManager.createNode(
+                        at: CGPoint(x: nodeState.x, y: nodeState.y),
+                        size: NSSize(width: nodeState.width, height: nodeState.height),
+                        workingDirectory: nodeState.workingDirectory
+                    )
+                    node.title = nodeState.title
+                }
+            }
+
+            // Switch to the previously active workspace
+            if activeIdx > 0 && activeIdx < workspaceManager.workspaces.count {
+                workspaceManager.switchTo(workspace: workspaceManager.workspaces[activeIdx])
             }
 
             if let wx = state.windowX, let wy = state.windowY,
@@ -235,10 +295,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 window.center()
             }
         } else {
-            nodeManager.createNode(at: Self.defaultNodeOrigin, size: Self.defaultNodeSize)
+            // Fresh start: one workspace with one terminal
+            let workspace = workspaceManager.createWorkspace(name: "Workspace 1")
+            workspace.nodeManager.delegate = self
+            canvasView.nodeManager = workspace.nodeManager
+            workspace.nodeManager.createNode(at: Self.defaultNodeOrigin, size: Self.defaultNodeSize)
             window.center()
         }
 
+        syncSidebar()
         window.makeKeyAndOrderFront(nil)
 
         // Poll for process state changes to update sidebar bolt icons
@@ -248,15 +313,27 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func checkProcessStates() {
-        let currentStates = nodeManager.nodes.map { node -> Bool in
-            guard let surface = node.terminalView.surface else { return false }
-            return ghostty_surface_needs_confirm_quit(surface)
+        // Check across all workspaces
+        var allStates: [Bool] = []
+        for workspace in workspaceManager.workspaces {
+            for node in workspace.nodeManager.nodes {
+                let surface = node.terminalView.surface
+                allStates.append(surface.map { ghostty_surface_needs_confirm_quit($0) } ?? false)
+            }
         }
-        if currentStates != cachedProcessStates {
-            cachedProcessStates = currentStates
-            sidebarModel.update(from: nodeManager)
+        if allStates != cachedProcessStates {
+            cachedProcessStates = allStates
+            sidebarModel.update(from: activeNodeManager)
+            sidebarModel.updateWorkspaces(from: workspaceManager)
             minimapView.refresh()
         }
+    }
+
+    private func syncSidebar() {
+        sidebarModel.update(from: activeNodeManager)
+        sidebarModel.updateWorkspaces(from: workspaceManager)
+        minimapView.nodeManager = activeNodeManager
+        minimapView.refresh()
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { true }
@@ -266,12 +343,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
         if isConfirmedClose { return .terminateNow }
 
-        let needsConfirm = nodeManager.nodes.contains { node in
-            guard let surface = node.terminalView.surface else { return false }
-            return ghostty_surface_needs_confirm_quit(surface)
-        }
-
-        guard needsConfirm else { return .terminateNow }
+        guard workspaceManager.anyWorkspaceNeedsConfirmation() else { return .terminateNow }
 
         let alert = NSAlert()
         alert.messageText = "Quit Finite?"
@@ -301,7 +373,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         buttonTitle: String = "Close",
         onConfirm: @escaping () -> Void
     ) {
-        guard nodeManager.selectedNodesNeedConfirmation() else {
+        guard activeNodeManager.selectedNodesNeedConfirmation() else {
             onConfirm()
             return
         }
@@ -321,33 +393,33 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - Actions
 
     @objc func newTerminal(_ sender: Any?) {
-        let node = nodeManager.createNode(size: Self.defaultNodeSize)
+        let node = activeNodeManager.createNode(size: Self.defaultNodeSize)
         ensureNodeVisible(node)
     }
 
     @objc func duplicateTerminal(_ sender: Any?) {
-        guard let focused = nodeManager.focusedNode else { return }
-        if let node = nodeManager.duplicateNode(focused) {
+        guard let focused = activeNodeManager.focusedNode else { return }
+        if let node = activeNodeManager.duplicateNode(focused) {
             ensureNodeVisible(node)
         }
     }
 
     @objc func closeTerminal(_ sender: Any?) {
-        let selected = nodeManager.selectedNodeViews
+        let selected = activeNodeManager.selectedNodeViews
         if selected.count > 1 {
             closeSelectedTerminals()
-        } else if let focused = nodeManager.focusedNode {
-            nodeManager.requestCloseNode(focused)
+        } else if let focused = activeNodeManager.focusedNode {
+            activeNodeManager.requestCloseNode(focused)
         }
     }
 
     private func closeSelectedTerminals() {
-        let count = nodeManager.selectedNodeViews.count
+        let count = activeNodeManager.selectedNodeViews.count
         showCloseConfirmation(
             message: "Close \(count) terminals?",
             buttonTitle: "Close All"
         ) { [weak self] in
-            self?.nodeManager.closeSelectedNodes()
+            self?.activeNodeManager.closeSelectedNodes()
         }
     }
 
@@ -416,26 +488,71 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @objc func zoomToFitFocused(_ sender: Any?) {
-        if let focused = nodeManager.focusedNode {
+        if let focused = activeNodeManager.focusedNode {
             let sw: CGFloat = sidebarOverlay.isHidden ? 0 : Self.sidebarWidth
             canvasView.zoomToFitNode(focused, sidebarWidth: sw)
         }
     }
 
     @objc func deselectAll(_ sender: Any?) {
-        nodeManager.clearSelection()
+        activeNodeManager.clearSelection()
     }
 
     @objc func tidySelection(_ sender: Any?) {
-        nodeManager.tidySelectedNodes()
+        activeNodeManager.tidySelectedNodes()
+    }
+
+    // MARK: - Workspace Actions
+
+    @objc func newWorkspace(_ sender: Any?) {
+        let name = workspaceManager.nextWorkspaceName()
+        let workspace = workspaceManager.createWorkspace(name: name)
+        workspace.nodeManager.delegate = self
+        workspace.nodeManager.createNode(at: Self.defaultNodeOrigin, size: Self.defaultNodeSize)
+        syncSidebar()
+    }
+
+    @objc func nextWorkspace(_ sender: Any?) {
+        workspaceManager.switchToNext()
+    }
+
+    @objc func previousWorkspace(_ sender: Any?) {
+        workspaceManager.switchToPrevious()
+    }
+
+    private func deleteWorkspace(_ workspace: Workspace) {
+        guard workspaceManager.workspaces.count > 1 else { return }
+
+        let hasRunning = workspace.nodeManager.nodes.contains { node in
+            guard let surface = node.terminalView.surface else { return false }
+            return ghostty_surface_needs_confirm_quit(surface)
+        }
+
+        if hasRunning {
+            let alert = NSAlert()
+            alert.messageText = "Delete \"\(workspace.name)\"?"
+            alert.informativeText = "This workspace has terminals with running processes. Delete anyway?"
+            alert.alertStyle = .warning
+            alert.addButton(withTitle: "Delete")
+            alert.addButton(withTitle: "Cancel")
+            alert.beginSheetModal(for: window) { [weak self] response in
+                if response == .alertFirstButtonReturn {
+                    self?.workspaceManager.deleteWorkspace(workspace)
+                    self?.syncSidebar()
+                }
+            }
+        } else {
+            workspaceManager.deleteWorkspace(workspace)
+            syncSidebar()
+        }
     }
 
     // MARK: - Navigation
 
     private func navigate(_ direction: TerminalNodeManager.Direction) {
-        guard let focused = nodeManager.focusedNode,
-              let target = nodeManager.nearestNode(from: focused, direction: direction) else { return }
-        nodeManager.handleClick(target, modifiers: [])
+        guard let focused = activeNodeManager.focusedNode,
+              let target = activeNodeManager.nearestNode(from: focused, direction: direction) else { return }
+        activeNodeManager.handleClick(target, modifiers: [])
         ensureNodeVisible(target)
     }
 
@@ -494,11 +611,7 @@ extension AppDelegate: NSWindowDelegate {
     func windowShouldClose(_ sender: NSWindow) -> Bool {
         if isConfirmedClose { return true }
 
-        let needsConfirm = nodeManager.nodes.contains { node in
-            guard let surface = node.terminalView.surface else { return false }
-            return ghostty_surface_needs_confirm_quit(surface)
-        }
-        guard needsConfirm else { return true }
+        guard workspaceManager.anyWorkspaceNeedsConfirmation() else { return true }
 
         let alert = NSAlert()
         alert.messageText = "Close Finite?"
@@ -524,12 +637,14 @@ extension AppDelegate: NSWindowDelegate {
         processStateTimer = nil
         minimapView.stopRefreshing()
 
-        CanvasState.save(from: nodeManager, transform: canvasView.canvasTransform, windowFrame: window.frame)
+        CanvasState.save(from: workspaceManager, canvasView: canvasView, windowFrame: window.frame)
 
-        nodeManager.isClosingWindow = true
-        for node in nodeManager.nodes {
-            if let surface = node.terminalView.surface {
-                ghostty_surface_request_close(surface)
+        for workspace in workspaceManager.workspaces {
+            workspace.nodeManager.isClosingWindow = true
+            for node in workspace.nodeManager.nodes {
+                if let surface = node.terminalView.surface {
+                    ghostty_surface_request_close(surface)
+                }
             }
         }
     }
@@ -539,7 +654,8 @@ extension AppDelegate: NSWindowDelegate {
 
 extension AppDelegate: TerminalNodeManagerDelegate {
     private func syncUI(_ manager: TerminalNodeManager) {
-        sidebarModel.update(from: manager)
+        sidebarModel.update(from: activeNodeManager)
+        sidebarModel.updateWorkspaces(from: workspaceManager)
         minimapView.refresh()
     }
 
@@ -554,5 +670,30 @@ extension AppDelegate: TerminalNodeManagerDelegate {
     func nodeManager(_ manager: TerminalNodeManager, didUpdateTitleFor node: TerminalNodeView) { syncUI(manager) }
     func nodeManager(_ manager: TerminalNodeManager, didUpdateActivityFor node: TerminalNodeView) { syncUI(manager) }
     func nodeManager(_ manager: TerminalNodeManager, didUpdateSelection selectedNodes: Set<ObjectIdentifier>) { syncUI(manager) }
-    func nodeManagerDidRemoveLastNode(_ manager: TerminalNodeManager) { window.close() }
+    func nodeManagerDidRemoveLastNode(_ manager: TerminalNodeManager) {
+        // Only close if ALL workspaces are empty
+        if workspaceManager.allWorkspacesEmpty {
+            window.close()
+        }
+    }
+}
+
+// MARK: - WorkspaceManagerDelegate
+
+extension AppDelegate: WorkspaceManagerDelegate {
+    func workspaceManager(_ manager: WorkspaceManager, didSwitchTo workspace: Workspace) {
+        syncSidebar()
+    }
+
+    func workspaceManager(_ manager: WorkspaceManager, didAdd workspace: Workspace) {
+        syncSidebar()
+    }
+
+    func workspaceManager(_ manager: WorkspaceManager, didRemove workspace: Workspace) {
+        syncSidebar()
+    }
+
+    func workspaceManager(_ manager: WorkspaceManager, didRename workspace: Workspace) {
+        syncSidebar()
+    }
 }
