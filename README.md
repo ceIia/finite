@@ -40,7 +40,7 @@ make release  # release build, installs to /Applications
 
 ### Canvas
 
-The canvas is infinite. Pan with the trackpad or scroll wheel, zoom with pinch gestures. Double-click empty space to zoom to fit all terminals.
+The canvas is infinite. Pan with the trackpad, scroll wheel, or middle-mouse drag. Zoom with pinch gestures or `Cmd+Scroll`. Double-click empty space to zoom to fit all terminals.
 
 Scroll direction is detected automatically: horizontal scrolling pans the canvas, vertical scrolling goes to the terminal under the cursor. Hold `Ctrl` to force canvas panning.
 
@@ -106,6 +106,8 @@ Window position, canvas transform, terminal layout, and working directories are 
 | `Escape` | Deselect All |
 | `Cmd+Click` | Toggle selection |
 | `Opt+Drag` | Move terminal from anywhere |
+| `Middle Mouse Drag` | Pan canvas |
+| `Cmd+Scroll` | Zoom canvas |
 | `Ctrl+Scroll` | Force canvas pan |
 | `Cmd` (while dragging) | Disable snap guides |
 

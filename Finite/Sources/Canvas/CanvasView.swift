@@ -27,6 +27,9 @@ class CanvasView: NSView {
     private var marqueeStart: CGPoint?
     private(set) var marqueeRect: NSRect?
 
+    /// Middle-mouse drag panning state.
+    private var middleMousePanStart: NSPoint?
+
     // MARK: - Scroll State Machine
 
     private enum ScrollTarget {
@@ -256,6 +259,29 @@ class CanvasView: NSView {
         manager.marqueeSelect(nodes: intersecting, toggle: cmdHeld)
     }
 
+    // MARK: - Middle Mouse Drag (pan canvas, Figma-style)
+
+    override func otherMouseDown(with event: NSEvent) {
+        guard event.buttonNumber == 2 else { return super.otherMouseDown(with: event) }
+        middleMousePanStart = event.locationInWindow
+        NSCursor.closedHand.push()
+    }
+
+    override func otherMouseDragged(with event: NSEvent) {
+        guard event.buttonNumber == 2, middleMousePanStart != nil else {
+            return super.otherMouseDragged(with: event)
+        }
+        canvasTransform.pan(by: CGPoint(x: -event.deltaX, y: event.deltaY))
+    }
+
+    override func otherMouseUp(with event: NSEvent) {
+        guard event.buttonNumber == 2, middleMousePanStart != nil else {
+            return super.otherMouseUp(with: event)
+        }
+        middleMousePanStart = nil
+        NSCursor.pop()
+    }
+
     func zoomToFitAll(sidebarWidth: CGFloat = 0) {
         let rects = terminalNodes.map { $0.frame }
         var viewportSize = bounds.size
@@ -303,6 +329,15 @@ class CanvasView: NSView {
         // Ctrl override: force canvas pan even if locked to terminal
         if event.modifierFlags.contains(.control) {
             scrollTarget = .canvas
+        }
+
+        // Cmd+scroll: zoom in/out using vertical scroll delta
+        if event.modifierFlags.contains(.command) {
+            let anchor = convert(event.locationInWindow, from: nil)
+            let zoomSensitivity: CGFloat = 0.01
+            let factor = 1.0 + event.scrollingDeltaY * zoomSensitivity
+            canvasTransform.zoom(by: factor, anchor: anchor)
+            return
         }
 
         // Route based on target
